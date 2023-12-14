@@ -18,7 +18,6 @@ all: help
 
 run-dev:  ## Run the dev server
 	@echo "Running dev server. It will refresh automatically when you change code."
-	@docker build -t archivista:dev .
 	@docker compose -f compose-dev.yml up --remove-orphans
 
 
@@ -37,6 +36,13 @@ clean: ## Clean up the dev server
 .PHONY: test
 test: ## Run tests
 	@bash ./test/test.sh
+
+
+.PHONY: db-migrations
+db-migrations:  ## Run the migrations for the mysql database
+	@atlas migrate diff mysql --dir "file://ent/migrate/migrations/mysql" --to "ent://ent/schema" --dev-url "docker://mysql/8/dev"
+	@atlas migrate diff pgsql --dir "file://ent/migrate/migrations/pgsql" --to "ent://ent/schema" --dev-url "docker://postgres/16/dev?search_path=public"
+
 
 help:  ## Show this help
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
