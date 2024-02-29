@@ -16,16 +16,27 @@ version: '3.9'
 
 services:
   db:
-    image: mysql:oracle
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
+    image: postgres:16
     ports:
-      - 3306:3306
+      - "5432:5432"
     environment:
-      MYSQL_DATABASE: testify
-      MYSQL_ROOT_PASSWORD: example
+      - POSTGRES_PASSWORD=secret
     volumes:
-      - mysqldata:/var/lib/mysql
+      - "psqldata:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 1s
+
+  redis:
+    image: redis:4.0
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: "exit 0"
+    restart: always
+    tty: true
 
   archivista:
     build:
@@ -47,6 +58,9 @@ services:
       ARCHIVISTA_ENABLE_GRAPHQL: "true"
       ARCHIVISTA_GRAPHQL_WEB_CLIENT_ENABLE: "true"
       ARCHIVISTA_CORS_ALLOW_ORIGINS: "http://localhost:1234"
+      ARCHIVISTA_TUF_ENDPOINT: "http://localhost"
+      ARCHIVISTA_SQL_STORE_BACKEND: PSQL
+      ARCHIVISTA_SQL_STORE_CONNECTION_STRING: postgresql://postgres:secret@db?sslmode=disable
 
     ports:
       - 8081:8081
@@ -54,6 +68,7 @@ services:
     volumes:
       - fileserver:/tmp/archivista
       - ./:/src
+      - ./../go-witness:/Users/kairo/dev/in-toto/go-witness
 
   minio:
     image: quay.io/minio/minio
@@ -71,11 +86,52 @@ services:
   minio-init:
     image: quay.io/minio/mc
     restart: on-failure
-    command: mb --insecure --ignore-existing testminio/attestations
+    command: mb --insecure --ignore-existing testminio/attestations testminio/policies
     environment:
       MC_HOST_testminio: http://testifytestifytestify:exampleexampleexample@minio:9000
+
+  web-tuf:
+    image: python:3.11-slim-buster
+    command: python -m http.server -d /var/opt/repository-service-tuf/storage 8080
+    volumes:
+      - rstuf-metadata:/var/opt/repository-service-tuf/storage
+      - ./dev/rstuf/configs:/rstuf
+    ports:
+      - "8080:8080"
+
+  rstuf-api:
+    image: ghcr.io/repository-service-tuf/repository-service-tuf-api:v0.11.1b1
+    ports:
+      - 8001:80
+    environment:
+      - RSTUF_BROKER_SERVER=redis://redis/1
+      - RSTUF_REDIS_SERVER=redis://redis
+
+  rstuf-worker:
+    image: ghcr.io/repository-service-tuf/repository-service-tuf-worker:v0.13.0b1
+    volumes:
+      - rstuf-metadata:/var/opt/repository-service-tuf/storage
+      - ./dev/rstuf/keys/online:/keyvault
+    environment:
+      - RSTUF_ONLINE_KEY_DIR=/keyvault
+      - RSTUF_STORAGE_BACKEND=LocalStorage
+      - RSTUF_LOCAL_STORAGE_BACKEND_PATH=/var/opt/repository-service-tuf/storage
+      # RSTUF supports the same S3 buckets as Archivista, but for transparency we are using a simple storage for TUF Metadata
+      # - RSTUF_STORAGE_BACKEND=AWSS3
+      # - RSTUF_AWSS3_STORAGE_BUCKET=tuf
+      # - RSTUF_AWSS3_STORAGE_ACCESS_KEY=testifytestifytestify
+      # - RSTUF_AWSS3_STORAGE_SECRET_KEY=exampleexampleexample
+      # - RSTUF_AWSS3_STORAGE_ENDPOINT_URL=http://minio:9000
+      - RSTUF_BROKER_SERVER=redis://redis/1
+      - RSTUF_REDIS_SERVER=redis://redis
+      - RSTUF_SQL_SERVER=postgresql://postgres:secret@db:5432
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   fileserver:
   miniodata:
-  mysqldata:
+  psqldata:
+  rstuf-metadata:
+  redisdata:

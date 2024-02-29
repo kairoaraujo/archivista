@@ -61,6 +61,24 @@ type ComplexityRoot struct {
 		Statement    func(childComplexity int) int
 	}
 
+	AttestationPolicy struct {
+		ID            func(childComplexity int) int
+		Name          func(childComplexity int) int
+		Statement     func(childComplexity int) int
+		SubjectScopes func(childComplexity int) int
+	}
+
+	AttestationPolicyConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	AttestationPolicyEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	Dsse struct {
 		GitoidSha256   func(childComplexity int) int
 		ID             func(childComplexity int) int
@@ -96,10 +114,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Dsses    func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.DsseWhereInput) int
-		Node     func(childComplexity int, id int) int
-		Nodes    func(childComplexity int, ids []int) int
-		Subjects func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.SubjectWhereInput) int
+		AttestationPolicies func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.AttestationPolicyWhereInput) int
+		Dsses               func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.DsseWhereInput) int
+		Node                func(childComplexity int, id int) int
+		Nodes               func(childComplexity int, ids []int) int
+		Subjects            func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.SubjectWhereInput) int
 	}
 
 	Signature struct {
@@ -114,6 +133,7 @@ type ComplexityRoot struct {
 		AttestationCollections func(childComplexity int) int
 		Dsse                   func(childComplexity int) int
 		ID                     func(childComplexity int) int
+		Policies               func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.AttestationPolicyWhereInput) int
 		Predicate              func(childComplexity int) int
 		Subjects               func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.SubjectWhereInput) int
 	}
@@ -143,6 +163,13 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	SubjectScope struct {
+		AttestationPolicy func(childComplexity int) int
+		ID                func(childComplexity int) int
+		Scope             func(childComplexity int) int
+		Subject           func(childComplexity int) int
+	}
+
 	Timestamp struct {
 		ID        func(childComplexity int) int
 		Signature func(childComplexity int) int
@@ -154,6 +181,7 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	Node(ctx context.Context, id int) (ent.Noder, error)
 	Nodes(ctx context.Context, ids []int) ([]ent.Noder, error)
+	AttestationPolicies(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.AttestationPolicyWhereInput) (*ent.AttestationPolicyConnection, error)
 	Dsses(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.DsseWhereInput) (*ent.DsseConnection, error)
 	Subjects(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.SubjectWhereInput) (*ent.SubjectConnection, error)
 }
@@ -225,6 +253,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AttestationCollection.Statement(childComplexity), true
+
+	case "AttestationPolicy.id":
+		if e.complexity.AttestationPolicy.ID == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicy.ID(childComplexity), true
+
+	case "AttestationPolicy.name":
+		if e.complexity.AttestationPolicy.Name == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicy.Name(childComplexity), true
+
+	case "AttestationPolicy.statement":
+		if e.complexity.AttestationPolicy.Statement == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicy.Statement(childComplexity), true
+
+	case "AttestationPolicy.subjectScopes":
+		if e.complexity.AttestationPolicy.SubjectScopes == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicy.SubjectScopes(childComplexity), true
+
+	case "AttestationPolicyConnection.edges":
+		if e.complexity.AttestationPolicyConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicyConnection.Edges(childComplexity), true
+
+	case "AttestationPolicyConnection.pageInfo":
+		if e.complexity.AttestationPolicyConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicyConnection.PageInfo(childComplexity), true
+
+	case "AttestationPolicyConnection.totalCount":
+		if e.complexity.AttestationPolicyConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicyConnection.TotalCount(childComplexity), true
+
+	case "AttestationPolicyEdge.cursor":
+		if e.complexity.AttestationPolicyEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicyEdge.Cursor(childComplexity), true
+
+	case "AttestationPolicyEdge.node":
+		if e.complexity.AttestationPolicyEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.AttestationPolicyEdge.Node(childComplexity), true
 
 	case "Dsse.gitoidSha256":
 		if e.complexity.Dsse.GitoidSha256 == nil {
@@ -359,6 +450,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PayloadDigest.Value(childComplexity), true
 
+	case "Query.attestationPolicies":
+		if e.complexity.Query.AttestationPolicies == nil {
+			break
+		}
+
+		args, err := ec.field_Query_attestationPolicies_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AttestationPolicies(childComplexity, args["after"].(*entgql.Cursor[int]), args["first"].(*int), args["before"].(*entgql.Cursor[int]), args["last"].(*int), args["where"].(*ent.AttestationPolicyWhereInput)), true
+
 	case "Query.dsses":
 		if e.complexity.Query.Dsses == nil {
 			break
@@ -462,6 +565,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Statement.ID(childComplexity), true
+
+	case "Statement.policies":
+		if e.complexity.Statement.Policies == nil {
+			break
+		}
+
+		args, err := ec.field_Statement_policies_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Statement.Policies(childComplexity, args["after"].(*entgql.Cursor[int]), args["first"].(*int), args["before"].(*entgql.Cursor[int]), args["last"].(*int), args["where"].(*ent.AttestationPolicyWhereInput)), true
 
 	case "Statement.predicate":
 		if e.complexity.Statement.Predicate == nil {
@@ -573,6 +688,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SubjectEdge.Node(childComplexity), true
 
+	case "SubjectScope.attestationPolicy":
+		if e.complexity.SubjectScope.AttestationPolicy == nil {
+			break
+		}
+
+		return e.complexity.SubjectScope.AttestationPolicy(childComplexity), true
+
+	case "SubjectScope.id":
+		if e.complexity.SubjectScope.ID == nil {
+			break
+		}
+
+		return e.complexity.SubjectScope.ID(childComplexity), true
+
+	case "SubjectScope.scope":
+		if e.complexity.SubjectScope.Scope == nil {
+			break
+		}
+
+		return e.complexity.SubjectScope.Scope(childComplexity), true
+
+	case "SubjectScope.subject":
+		if e.complexity.SubjectScope.Subject == nil {
+			break
+		}
+
+		return e.complexity.SubjectScope.Subject(childComplexity), true
+
 	case "Timestamp.id":
 		if e.complexity.Timestamp.ID == nil {
 			break
@@ -610,12 +753,14 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputAttestationCollectionWhereInput,
+		ec.unmarshalInputAttestationPolicyWhereInput,
 		ec.unmarshalInputAttestationWhereInput,
 		ec.unmarshalInputDsseWhereInput,
 		ec.unmarshalInputPayloadDigestWhereInput,
 		ec.unmarshalInputSignatureWhereInput,
 		ec.unmarshalInputStatementWhereInput,
 		ec.unmarshalInputSubjectDigestWhereInput,
+		ec.unmarshalInputSubjectScopeWhereInput,
 		ec.unmarshalInputSubjectWhereInput,
 		ec.unmarshalInputTimestampWhereInput,
 	)
@@ -735,6 +880,57 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_attestationPolicies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *entgql.Cursor[int]
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg0, err = ec.unmarshalOCursor2ᚖentgoᚗioᚋcontribᚋentgqlᚐCursor(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *entgql.Cursor[int]
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg2, err = ec.unmarshalOCursor2ᚖentgoᚗioᚋcontribᚋentgqlᚐCursor(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg3
+	var arg4 *ent.AttestationPolicyWhereInput
+	if tmp, ok := rawArgs["where"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+		arg4, err = ec.unmarshalOAttestationPolicyWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["where"] = arg4
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_dsses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -777,7 +973,7 @@ func (ec *executionContext) field_Query_dsses_args(ctx context.Context, rawArgs 
 	var arg4 *ent.DsseWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalODsseWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalODsseWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -858,7 +1054,58 @@ func (ec *executionContext) field_Query_subjects_args(ctx context.Context, rawAr
 	var arg4 *ent.SubjectWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["where"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_Statement_policies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *entgql.Cursor[int]
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg0, err = ec.unmarshalOCursor2ᚖentgoᚗioᚋcontribᚋentgqlᚐCursor(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *entgql.Cursor[int]
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg2, err = ec.unmarshalOCursor2ᚖentgoᚗioᚋcontribᚋentgqlᚐCursor(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg3
+	var arg4 *ent.AttestationPolicyWhereInput
+	if tmp, ok := rawArgs["where"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+		arg4, err = ec.unmarshalOAttestationPolicyWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -909,7 +1156,7 @@ func (ec *executionContext) field_Statement_subjects_args(ctx context.Context, r
 	var arg4 *ent.SubjectWhereInput
 	if tmp, ok := rawArgs["where"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
-		arg4, err = ec.unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInput(ctx, tmp)
+		arg4, err = ec.unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1072,7 +1319,7 @@ func (ec *executionContext) _Attestation_attestationCollection(ctx context.Conte
 	}
 	res := resTmp.(*ent.AttestationCollection)
 	fc.Result = res
-	return ec.marshalNAttestationCollection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollection(ctx, field.Selections, res)
+	return ec.marshalNAttestationCollection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Attestation_attestationCollection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1211,7 +1458,7 @@ func (ec *executionContext) _AttestationCollection_attestations(ctx context.Cont
 	}
 	res := resTmp.([]*ent.Attestation)
 	fc.Result = res
-	return ec.marshalOAttestation2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationᚄ(ctx, field.Selections, res)
+	return ec.marshalOAttestation2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AttestationCollection_attestations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1263,7 +1510,7 @@ func (ec *executionContext) _AttestationCollection_statement(ctx context.Context
 	}
 	res := resTmp.(*ent.Statement)
 	fc.Result = res
-	return ec.marshalNStatement2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
+	return ec.marshalNStatement2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AttestationCollection_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1280,12 +1527,448 @@ func (ec *executionContext) fieldContext_AttestationCollection_statement(ctx con
 				return ec.fieldContext_Statement_predicate(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Statement_subjects(ctx, field)
+			case "policies":
+				return ec.fieldContext_Statement_policies(ctx, field)
 			case "attestationCollections":
 				return ec.fieldContext_Statement_attestationCollections(ctx, field)
 			case "dsse":
 				return ec.fieldContext_Statement_dsse(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Statement", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicy_id(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicy) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicy_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicy_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicy",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicy_name(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicy) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicy_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicy_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicy",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicy_subjectScopes(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicy) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicy_subjectScopes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SubjectScopes(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.SubjectScope)
+	fc.Result = res
+	return ec.marshalOSubjectScope2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicy_subjectScopes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicy",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SubjectScope_id(ctx, field)
+			case "subject":
+				return ec.fieldContext_SubjectScope_subject(ctx, field)
+			case "scope":
+				return ec.fieldContext_SubjectScope_scope(ctx, field)
+			case "attestationPolicy":
+				return ec.fieldContext_SubjectScope_attestationPolicy(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SubjectScope", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicy_statement(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicy) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicy_statement(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Statement(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Statement)
+	fc.Result = res
+	return ec.marshalOStatement2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicy_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicy",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Statement_id(ctx, field)
+			case "predicate":
+				return ec.fieldContext_Statement_predicate(ctx, field)
+			case "subjects":
+				return ec.fieldContext_Statement_subjects(ctx, field)
+			case "policies":
+				return ec.fieldContext_Statement_policies(ctx, field)
+			case "attestationCollections":
+				return ec.fieldContext_Statement_attestationCollections(ctx, field)
+			case "dsse":
+				return ec.fieldContext_Statement_dsse(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Statement", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicyConnection_edges(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicyConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicyConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.AttestationPolicyEdge)
+	fc.Result = res
+	return ec.marshalOAttestationPolicyEdge2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicyConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicyConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "node":
+				return ec.fieldContext_AttestationPolicyEdge_node(ctx, field)
+			case "cursor":
+				return ec.fieldContext_AttestationPolicyEdge_cursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AttestationPolicyEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicyConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicyConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicyConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(entgql.PageInfo[int])
+	fc.Result = res
+	return ec.marshalNPageInfo2entgoᚗioᚋcontribᚋentgqlᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicyConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicyConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicyConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicyConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicyConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicyConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicyConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicyEdge_node(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicyEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicyEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AttestationPolicy)
+	fc.Result = res
+	return ec.marshalOAttestationPolicy2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicy(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicyEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicyEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_AttestationPolicy_id(ctx, field)
+			case "name":
+				return ec.fieldContext_AttestationPolicy_name(ctx, field)
+			case "subjectScopes":
+				return ec.fieldContext_AttestationPolicy_subjectScopes(ctx, field)
+			case "statement":
+				return ec.fieldContext_AttestationPolicy_statement(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AttestationPolicy", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AttestationPolicyEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *ent.AttestationPolicyEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AttestationPolicyEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(entgql.Cursor[int])
+	fc.Result = res
+	return ec.marshalNCursor2entgoᚗioᚋcontribᚋentgqlᚐCursor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AttestationPolicyEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AttestationPolicyEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Cursor does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1448,7 +2131,7 @@ func (ec *executionContext) _Dsse_statement(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*ent.Statement)
 	fc.Result = res
-	return ec.marshalOStatement2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
+	return ec.marshalOStatement2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Dsse_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1465,6 +2148,8 @@ func (ec *executionContext) fieldContext_Dsse_statement(ctx context.Context, fie
 				return ec.fieldContext_Statement_predicate(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Statement_subjects(ctx, field)
+			case "policies":
+				return ec.fieldContext_Statement_policies(ctx, field)
 			case "attestationCollections":
 				return ec.fieldContext_Statement_attestationCollections(ctx, field)
 			case "dsse":
@@ -1501,7 +2186,7 @@ func (ec *executionContext) _Dsse_signatures(ctx context.Context, field graphql.
 	}
 	res := resTmp.([]*ent.Signature)
 	fc.Result = res
-	return ec.marshalOSignature2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureᚄ(ctx, field.Selections, res)
+	return ec.marshalOSignature2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Dsse_signatures(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1554,7 +2239,7 @@ func (ec *executionContext) _Dsse_payloadDigests(ctx context.Context, field grap
 	}
 	res := resTmp.([]*ent.PayloadDigest)
 	fc.Result = res
-	return ec.marshalOPayloadDigest2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestᚄ(ctx, field.Selections, res)
+	return ec.marshalOPayloadDigest2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Dsse_payloadDigests(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1605,7 +2290,7 @@ func (ec *executionContext) _DsseConnection_edges(ctx context.Context, field gra
 	}
 	res := resTmp.([]*ent.DsseEdge)
 	fc.Result = res
-	return ec.marshalODsseEdge2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseEdge(ctx, field.Selections, res)
+	return ec.marshalODsseEdge2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_DsseConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1750,7 +2435,7 @@ func (ec *executionContext) _DsseEdge_node(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*ent.Dsse)
 	fc.Result = res
-	return ec.marshalODsse2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsse(ctx, field.Selections, res)
+	return ec.marshalODsse2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_DsseEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2151,7 +2836,7 @@ func (ec *executionContext) _PayloadDigest_dsse(ctx context.Context, field graph
 	}
 	res := resTmp.(*ent.Dsse)
 	fc.Result = res
-	return ec.marshalODsse2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsse(ctx, field.Selections, res)
+	return ec.marshalODsse2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PayloadDigest_dsse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2206,7 +2891,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(ent.Noder)
 	fc.Result = res
-	return ec.marshalONode2githubᚗcomᚋtestifysecᚋarchivistaᚋentᚐNoder(ctx, field.Selections, res)
+	return ec.marshalONode2githubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐNoder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2261,7 +2946,7 @@ func (ec *executionContext) _Query_nodes(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]ent.Noder)
 	fc.Result = res
-	return ec.marshalNNode2ᚕgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐNoder(ctx, field.Selections, res)
+	return ec.marshalNNode2ᚕgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐNoder(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2282,6 +2967,69 @@ func (ec *executionContext) fieldContext_Query_nodes(ctx context.Context, field 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_nodes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_attestationPolicies(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_attestationPolicies(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AttestationPolicies(rctx, fc.Args["after"].(*entgql.Cursor[int]), fc.Args["first"].(*int), fc.Args["before"].(*entgql.Cursor[int]), fc.Args["last"].(*int), fc.Args["where"].(*ent.AttestationPolicyWhereInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AttestationPolicyConnection)
+	fc.Result = res
+	return ec.marshalNAttestationPolicyConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_attestationPolicies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_AttestationPolicyConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_AttestationPolicyConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_AttestationPolicyConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AttestationPolicyConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_attestationPolicies_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2316,7 +3064,7 @@ func (ec *executionContext) _Query_dsses(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*ent.DsseConnection)
 	fc.Result = res
-	return ec.marshalNDsseConnection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseConnection(ctx, field.Selections, res)
+	return ec.marshalNDsseConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_dsses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2379,7 +3127,7 @@ func (ec *executionContext) _Query_subjects(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*ent.SubjectConnection)
 	fc.Result = res
-	return ec.marshalNSubjectConnection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectConnection(ctx, field.Selections, res)
+	return ec.marshalNSubjectConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_subjects(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2700,7 +3448,7 @@ func (ec *executionContext) _Signature_dsse(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*ent.Dsse)
 	fc.Result = res
-	return ec.marshalODsse2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsse(ctx, field.Selections, res)
+	return ec.marshalODsse2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Signature_dsse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2755,7 +3503,7 @@ func (ec *executionContext) _Signature_timestamps(ctx context.Context, field gra
 	}
 	res := resTmp.([]*ent.Timestamp)
 	fc.Result = res
-	return ec.marshalOTimestamp2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampᚄ(ctx, field.Selections, res)
+	return ec.marshalOTimestamp2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Signature_timestamps(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2897,7 +3645,7 @@ func (ec *executionContext) _Statement_subjects(ctx context.Context, field graph
 	}
 	res := resTmp.(*ent.SubjectConnection)
 	fc.Result = res
-	return ec.marshalNSubjectConnection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectConnection(ctx, field.Selections, res)
+	return ec.marshalNSubjectConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Statement_subjects(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2932,6 +3680,69 @@ func (ec *executionContext) fieldContext_Statement_subjects(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Statement_policies(ctx context.Context, field graphql.CollectedField, obj *ent.Statement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Statement_policies(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Policies(ctx, fc.Args["after"].(*entgql.Cursor[int]), fc.Args["first"].(*int), fc.Args["before"].(*entgql.Cursor[int]), fc.Args["last"].(*int), fc.Args["where"].(*ent.AttestationPolicyWhereInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AttestationPolicyConnection)
+	fc.Result = res
+	return ec.marshalNAttestationPolicyConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Statement_policies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Statement",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_AttestationPolicyConnection_edges(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_AttestationPolicyConnection_pageInfo(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_AttestationPolicyConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AttestationPolicyConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Statement_policies_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Statement_attestationCollections(ctx context.Context, field graphql.CollectedField, obj *ent.Statement) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Statement_attestationCollections(ctx, field)
 	if err != nil {
@@ -2957,7 +3768,7 @@ func (ec *executionContext) _Statement_attestationCollections(ctx context.Contex
 	}
 	res := resTmp.(*ent.AttestationCollection)
 	fc.Result = res
-	return ec.marshalOAttestationCollection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollection(ctx, field.Selections, res)
+	return ec.marshalOAttestationCollection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Statement_attestationCollections(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3008,7 +3819,7 @@ func (ec *executionContext) _Statement_dsse(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*ent.Dsse)
 	fc.Result = res
-	return ec.marshalODsse2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseᚄ(ctx, field.Selections, res)
+	return ec.marshalODsse2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Statement_dsse(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3151,7 +3962,7 @@ func (ec *executionContext) _Subject_subjectDigests(ctx context.Context, field g
 	}
 	res := resTmp.([]*ent.SubjectDigest)
 	fc.Result = res
-	return ec.marshalOSubjectDigest2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestᚄ(ctx, field.Selections, res)
+	return ec.marshalOSubjectDigest2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Subject_subjectDigests(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3202,7 +4013,7 @@ func (ec *executionContext) _Subject_statement(ctx context.Context, field graphq
 	}
 	res := resTmp.(*ent.Statement)
 	fc.Result = res
-	return ec.marshalOStatement2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
+	return ec.marshalOStatement2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatement(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Subject_statement(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3219,6 +4030,8 @@ func (ec *executionContext) fieldContext_Subject_statement(ctx context.Context, 
 				return ec.fieldContext_Statement_predicate(ctx, field)
 			case "subjects":
 				return ec.fieldContext_Statement_subjects(ctx, field)
+			case "policies":
+				return ec.fieldContext_Statement_policies(ctx, field)
 			case "attestationCollections":
 				return ec.fieldContext_Statement_attestationCollections(ctx, field)
 			case "dsse":
@@ -3255,7 +4068,7 @@ func (ec *executionContext) _SubjectConnection_edges(ctx context.Context, field 
 	}
 	res := resTmp.([]*ent.SubjectEdge)
 	fc.Result = res
-	return ec.marshalOSubjectEdge2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectEdge(ctx, field.Selections, res)
+	return ec.marshalOSubjectEdge2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SubjectConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3532,7 +4345,7 @@ func (ec *executionContext) _SubjectDigest_subject(ctx context.Context, field gr
 	}
 	res := resTmp.(*ent.Subject)
 	fc.Result = res
-	return ec.marshalOSubject2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubject(ctx, field.Selections, res)
+	return ec.marshalOSubject2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SubjectDigest_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3583,7 +4396,7 @@ func (ec *executionContext) _SubjectEdge_node(ctx context.Context, field graphql
 	}
 	res := resTmp.(*ent.Subject)
 	fc.Result = res
-	return ec.marshalOSubject2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubject(ctx, field.Selections, res)
+	return ec.marshalOSubject2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_SubjectEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3648,6 +4461,189 @@ func (ec *executionContext) fieldContext_SubjectEdge_cursor(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SubjectScope_id(ctx context.Context, field graphql.CollectedField, obj *ent.SubjectScope) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SubjectScope_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SubjectScope_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SubjectScope",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SubjectScope_subject(ctx context.Context, field graphql.CollectedField, obj *ent.SubjectScope) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SubjectScope_subject(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Subject, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SubjectScope_subject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SubjectScope",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SubjectScope_scope(ctx context.Context, field graphql.CollectedField, obj *ent.SubjectScope) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SubjectScope_scope(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Scope, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SubjectScope_scope(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SubjectScope",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SubjectScope_attestationPolicy(ctx context.Context, field graphql.CollectedField, obj *ent.SubjectScope) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SubjectScope_attestationPolicy(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AttestationPolicy(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AttestationPolicy)
+	fc.Result = res
+	return ec.marshalOAttestationPolicy2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicy(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SubjectScope_attestationPolicy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SubjectScope",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_AttestationPolicy_id(ctx, field)
+			case "name":
+				return ec.fieldContext_AttestationPolicy_name(ctx, field)
+			case "subjectScopes":
+				return ec.fieldContext_AttestationPolicy_subjectScopes(ctx, field)
+			case "statement":
+				return ec.fieldContext_AttestationPolicy_statement(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AttestationPolicy", field.Name)
 		},
 	}
 	return fc, nil
@@ -3810,7 +4806,7 @@ func (ec *executionContext) _Timestamp_signature(ctx context.Context, field grap
 	}
 	res := resTmp.(*ent.Signature)
 	fc.Result = res
-	return ec.marshalOSignature2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignature(ctx, field.Selections, res)
+	return ec.marshalOSignature2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignature(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Timestamp_signature(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5626,35 +6622,27 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx, v)
+			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5662,8 +6650,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5671,8 +6657,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -5680,8 +6664,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -5689,8 +6671,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5698,8 +6678,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5707,8 +6685,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5716,8 +6692,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5725,8 +6699,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.IDLTE = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5734,8 +6706,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.Name = data
 		case "nameNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5743,8 +6713,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameNEQ = data
 		case "nameIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -5752,8 +6720,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameIn = data
 		case "nameNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -5761,8 +6727,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameNotIn = data
 		case "nameGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5770,8 +6734,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameGT = data
 		case "nameGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5779,8 +6741,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameGTE = data
 		case "nameLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5788,8 +6748,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameLT = data
 		case "nameLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5797,8 +6755,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameLTE = data
 		case "nameContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5806,8 +6762,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameContains = data
 		case "nameHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5815,8 +6769,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameHasPrefix = data
 		case "nameHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5824,8 +6776,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameHasSuffix = data
 		case "nameEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5833,8 +6783,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameEqualFold = data
 		case "nameContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5842,8 +6790,6 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.NameContainsFold = data
 		case "hasAttestations":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestations"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -5851,17 +6797,13 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.HasAttestations = data
 		case "hasAttestationsWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationsWith"))
-			data, err := ec.unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasAttestationsWith = data
 		case "hasStatement":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatement"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -5869,10 +6811,224 @@ func (ec *executionContext) unmarshalInputAttestationCollectionWhereInput(ctx co
 			}
 			it.HasStatement = data
 		case "hasStatementWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatementWith"))
-			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasStatementWith = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAttestationPolicyWhereInput(ctx context.Context, obj interface{}) (ent.AttestationPolicyWhereInput, error) {
+	var it ent.AttestationPolicyWhereInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "hasSubjectScopes", "hasSubjectScopesWith", "hasStatement", "hasStatementWith"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOAttestationPolicyWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOAttestationPolicyWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOAttestationPolicyWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "idNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNEQ = data
+		case "idIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDIn = data
+		case "idNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNotIn = data
+		case "idGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGT = data
+		case "idGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGTE = data
+		case "idLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLT = data
+		case "idLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLTE = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "nameNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameNEQ = data
+		case "nameIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameIn = data
+		case "nameNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameNotIn = data
+		case "nameGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameGT = data
+		case "nameGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameGTE = data
+		case "nameLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameLT = data
+		case "nameLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameLTE = data
+		case "nameContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameContains = data
+		case "nameHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameHasPrefix = data
+		case "nameHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameHasSuffix = data
+		case "nameEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameEqualFold = data
+		case "nameContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NameContainsFold = data
+		case "hasSubjectScopes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjectScopes"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasSubjectScopes = data
+		case "hasSubjectScopesWith":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjectScopesWith"))
+			data, err := ec.unmarshalOSubjectScopeWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasSubjectScopesWith = data
+		case "hasStatement":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatement"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasStatement = data
+		case "hasStatementWith":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatementWith"))
+			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5898,35 +7054,27 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOAttestationWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInput(ctx, v)
+			data, err := ec.unmarshalOAttestationWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5934,8 +7082,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5943,8 +7089,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -5952,8 +7096,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -5961,8 +7103,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5970,8 +7110,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5979,8 +7117,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5988,8 +7124,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -5997,8 +7131,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.IDLTE = data
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6006,8 +7138,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.Type = data
 		case "typeNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6015,8 +7145,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeNEQ = data
 		case "typeIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6024,8 +7152,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeIn = data
 		case "typeNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6033,8 +7159,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeNotIn = data
 		case "typeGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6042,8 +7166,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeGT = data
 		case "typeGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6051,8 +7173,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeGTE = data
 		case "typeLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6060,8 +7180,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeLT = data
 		case "typeLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6069,8 +7187,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeLTE = data
 		case "typeContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6078,8 +7194,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeContains = data
 		case "typeHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6087,8 +7201,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeHasPrefix = data
 		case "typeHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6096,8 +7208,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeHasSuffix = data
 		case "typeEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6105,8 +7215,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeEqualFold = data
 		case "typeContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6114,8 +7222,6 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.TypeContainsFold = data
 		case "hasAttestationCollection":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationCollection"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -6123,10 +7229,8 @@ func (ec *executionContext) unmarshalInputAttestationWhereInput(ctx context.Cont
 			}
 			it.HasAttestationCollection = data
 		case "hasAttestationCollectionWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationCollectionWith"))
-			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6152,35 +7256,27 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalODsseWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInput(ctx, v)
+			data, err := ec.unmarshalODsseWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6188,8 +7284,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6197,8 +7291,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -6206,8 +7298,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -6215,8 +7305,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6224,8 +7312,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6233,8 +7319,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6242,8 +7326,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6251,8 +7333,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.IDLTE = data
 		case "gitoidSha256":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6260,8 +7340,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256 = data
 		case "gitoidSha256NEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256NEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6269,8 +7347,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256NEQ = data
 		case "gitoidSha256In":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256In"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6278,8 +7354,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256In = data
 		case "gitoidSha256NotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256NotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6287,8 +7361,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256NotIn = data
 		case "gitoidSha256GT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256GT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6296,8 +7368,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256GT = data
 		case "gitoidSha256GTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256GTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6305,8 +7375,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256GTE = data
 		case "gitoidSha256LT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256LT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6314,8 +7382,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256LT = data
 		case "gitoidSha256LTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256LTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6323,8 +7389,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256LTE = data
 		case "gitoidSha256Contains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256Contains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6332,8 +7396,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256Contains = data
 		case "gitoidSha256HasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256HasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6341,8 +7403,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256HasPrefix = data
 		case "gitoidSha256HasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256HasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6350,8 +7410,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256HasSuffix = data
 		case "gitoidSha256EqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256EqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6359,8 +7417,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256EqualFold = data
 		case "gitoidSha256ContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("gitoidSha256ContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6368,8 +7424,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.GitoidSha256ContainsFold = data
 		case "payloadType":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadType"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6377,8 +7431,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadType = data
 		case "payloadTypeNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6386,8 +7438,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeNEQ = data
 		case "payloadTypeIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6395,8 +7445,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeIn = data
 		case "payloadTypeNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6404,8 +7452,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeNotIn = data
 		case "payloadTypeGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6413,8 +7459,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeGT = data
 		case "payloadTypeGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6422,8 +7466,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeGTE = data
 		case "payloadTypeLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6431,8 +7473,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeLT = data
 		case "payloadTypeLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6440,8 +7480,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeLTE = data
 		case "payloadTypeContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6449,8 +7487,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeContains = data
 		case "payloadTypeHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6458,8 +7494,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeHasPrefix = data
 		case "payloadTypeHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6467,8 +7501,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeHasSuffix = data
 		case "payloadTypeEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6476,8 +7508,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeEqualFold = data
 		case "payloadTypeContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("payloadTypeContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6485,8 +7515,6 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.PayloadTypeContainsFold = data
 		case "hasStatement":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatement"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -6494,17 +7522,13 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.HasStatement = data
 		case "hasStatementWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatementWith"))
-			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasStatementWith = data
 		case "hasSignatures":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSignatures"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -6512,17 +7536,13 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.HasSignatures = data
 		case "hasSignaturesWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSignaturesWith"))
-			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasSignaturesWith = data
 		case "hasPayloadDigests":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasPayloadDigests"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -6530,10 +7550,8 @@ func (ec *executionContext) unmarshalInputDsseWhereInput(ctx context.Context, ob
 			}
 			it.HasPayloadDigests = data
 		case "hasPayloadDigestsWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasPayloadDigestsWith"))
-			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6559,35 +7577,27 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx, v)
+			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6595,8 +7605,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6604,8 +7612,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -6613,8 +7619,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -6622,8 +7626,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6631,8 +7633,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6640,8 +7640,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6649,8 +7647,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6658,8 +7654,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.IDLTE = data
 		case "algorithm":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6667,8 +7661,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.Algorithm = data
 		case "algorithmNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6676,8 +7668,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmNEQ = data
 		case "algorithmIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6685,8 +7675,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmIn = data
 		case "algorithmNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6694,8 +7682,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmNotIn = data
 		case "algorithmGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6703,8 +7689,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmGT = data
 		case "algorithmGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6712,8 +7696,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmGTE = data
 		case "algorithmLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6721,8 +7703,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmLT = data
 		case "algorithmLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6730,8 +7710,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmLTE = data
 		case "algorithmContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6739,8 +7717,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmContains = data
 		case "algorithmHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6748,8 +7724,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmHasPrefix = data
 		case "algorithmHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6757,8 +7731,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmHasSuffix = data
 		case "algorithmEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6766,8 +7738,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmEqualFold = data
 		case "algorithmContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6775,8 +7745,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmContainsFold = data
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6784,8 +7752,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.Value = data
 		case "valueNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6793,8 +7759,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueNEQ = data
 		case "valueIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6802,8 +7766,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueIn = data
 		case "valueNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -6811,8 +7773,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueNotIn = data
 		case "valueGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6820,8 +7780,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueGT = data
 		case "valueGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6829,8 +7787,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueGTE = data
 		case "valueLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6838,8 +7794,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueLT = data
 		case "valueLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6847,8 +7801,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueLTE = data
 		case "valueContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6856,8 +7808,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueContains = data
 		case "valueHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6865,8 +7815,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueHasPrefix = data
 		case "valueHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6874,8 +7822,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueHasSuffix = data
 		case "valueEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6883,8 +7829,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueEqualFold = data
 		case "valueContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -6892,8 +7836,6 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.ValueContainsFold = data
 		case "hasDsse":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDsse"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -6901,10 +7843,8 @@ func (ec *executionContext) unmarshalInputPayloadDigestWhereInput(ctx context.Co
 			}
 			it.HasDsse = data
 		case "hasDsseWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDsseWith"))
-			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6930,35 +7870,27 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOSignatureWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInput(ctx, v)
+			data, err := ec.unmarshalOSignatureWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6966,8 +7898,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -6975,8 +7905,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -6984,8 +7912,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -6993,8 +7919,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7002,8 +7926,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7011,8 +7933,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7020,8 +7940,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7029,8 +7947,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.IDLTE = data
 		case "keyID":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyID"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7038,8 +7954,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyID = data
 		case "keyIDNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7047,8 +7961,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDNEQ = data
 		case "keyIDIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7056,8 +7968,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDIn = data
 		case "keyIDNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7065,8 +7975,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDNotIn = data
 		case "keyIDGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7074,8 +7982,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDGT = data
 		case "keyIDGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7083,8 +7989,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDGTE = data
 		case "keyIDLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7092,8 +7996,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDLT = data
 		case "keyIDLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7101,8 +8003,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDLTE = data
 		case "keyIDContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7110,8 +8010,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDContains = data
 		case "keyIDHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7119,8 +8017,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDHasPrefix = data
 		case "keyIDHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7128,8 +8024,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDHasSuffix = data
 		case "keyIDEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7137,8 +8031,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDEqualFold = data
 		case "keyIDContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyIDContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7146,8 +8038,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.KeyIDContainsFold = data
 		case "signature":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signature"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7155,8 +8045,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.Signature = data
 		case "signatureNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7164,8 +8052,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureNEQ = data
 		case "signatureIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7173,8 +8059,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureIn = data
 		case "signatureNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7182,8 +8066,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureNotIn = data
 		case "signatureGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7191,8 +8073,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureGT = data
 		case "signatureGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7200,8 +8080,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureGTE = data
 		case "signatureLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7209,8 +8087,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureLT = data
 		case "signatureLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7218,8 +8094,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureLTE = data
 		case "signatureContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7227,8 +8101,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureContains = data
 		case "signatureHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7236,8 +8108,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureHasPrefix = data
 		case "signatureHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7245,8 +8115,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureHasSuffix = data
 		case "signatureEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7254,8 +8122,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureEqualFold = data
 		case "signatureContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("signatureContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7263,8 +8129,6 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.SignatureContainsFold = data
 		case "hasDsse":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDsse"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -7272,17 +8136,13 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.HasDsse = data
 		case "hasDsseWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDsseWith"))
-			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasDsseWith = data
 		case "hasTimestamps":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasTimestamps"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -7290,10 +8150,8 @@ func (ec *executionContext) unmarshalInputSignatureWhereInput(ctx context.Contex
 			}
 			it.HasTimestamps = data
 		case "hasTimestampsWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasTimestampsWith"))
-			data, err := ec.unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7311,7 +8169,7 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "predicate", "predicateNEQ", "predicateIn", "predicateNotIn", "predicateGT", "predicateGTE", "predicateLT", "predicateLTE", "predicateContains", "predicateHasPrefix", "predicateHasSuffix", "predicateEqualFold", "predicateContainsFold", "hasSubjects", "hasSubjectsWith", "hasAttestationCollections", "hasAttestationCollectionsWith", "hasDsse", "hasDsseWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "predicate", "predicateNEQ", "predicateIn", "predicateNotIn", "predicateGT", "predicateGTE", "predicateLT", "predicateLTE", "predicateContains", "predicateHasPrefix", "predicateHasSuffix", "predicateEqualFold", "predicateContainsFold", "hasSubjects", "hasSubjectsWith", "hasPolicies", "hasPoliciesWith", "hasAttestationCollections", "hasAttestationCollectionsWith", "hasDsse", "hasDsseWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -7319,35 +8177,27 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOStatementWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInput(ctx, v)
+			data, err := ec.unmarshalOStatementWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7355,8 +8205,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7364,8 +8212,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -7373,8 +8219,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -7382,8 +8226,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7391,8 +8233,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7400,8 +8240,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7409,8 +8247,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7418,8 +8254,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.IDLTE = data
 		case "predicate":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicate"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7427,8 +8261,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.Predicate = data
 		case "predicateNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7436,8 +8268,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateNEQ = data
 		case "predicateIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7445,8 +8275,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateIn = data
 		case "predicateNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7454,8 +8282,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateNotIn = data
 		case "predicateGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7463,8 +8289,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateGT = data
 		case "predicateGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7472,8 +8296,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateGTE = data
 		case "predicateLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7481,8 +8303,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateLT = data
 		case "predicateLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7490,8 +8310,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateLTE = data
 		case "predicateContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7499,8 +8317,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateContains = data
 		case "predicateHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7508,8 +8324,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateHasPrefix = data
 		case "predicateHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7517,8 +8331,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateHasSuffix = data
 		case "predicateEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7526,8 +8338,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateEqualFold = data
 		case "predicateContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("predicateContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7535,8 +8345,6 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.PredicateContainsFold = data
 		case "hasSubjects":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjects"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -7544,17 +8352,27 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.HasSubjects = data
 		case "hasSubjectsWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjectsWith"))
-			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasSubjectsWith = data
+		case "hasPolicies":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasPolicies"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasPolicies = data
+		case "hasPoliciesWith":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasPoliciesWith"))
+			data, err := ec.unmarshalOAttestationPolicyWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasPoliciesWith = data
 		case "hasAttestationCollections":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationCollections"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -7562,17 +8380,13 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.HasAttestationCollections = data
 		case "hasAttestationCollectionsWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationCollectionsWith"))
-			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasAttestationCollectionsWith = data
 		case "hasDsse":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDsse"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -7580,10 +8394,8 @@ func (ec *executionContext) unmarshalInputStatementWhereInput(ctx context.Contex
 			}
 			it.HasDsse = data
 		case "hasDsseWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasDsseWith"))
-			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7609,35 +8421,27 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx, v)
+			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7645,8 +8449,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7654,8 +8456,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -7663,8 +8463,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -7672,8 +8470,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7681,8 +8477,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7690,8 +8484,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7699,8 +8491,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -7708,8 +8498,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.IDLTE = data
 		case "algorithm":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithm"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7717,8 +8505,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.Algorithm = data
 		case "algorithmNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7726,8 +8512,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmNEQ = data
 		case "algorithmIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7735,8 +8519,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmIn = data
 		case "algorithmNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7744,8 +8526,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmNotIn = data
 		case "algorithmGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7753,8 +8533,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmGT = data
 		case "algorithmGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7762,8 +8540,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmGTE = data
 		case "algorithmLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7771,8 +8547,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmLT = data
 		case "algorithmLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7780,8 +8554,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmLTE = data
 		case "algorithmContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7789,8 +8561,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmContains = data
 		case "algorithmHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7798,8 +8568,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmHasPrefix = data
 		case "algorithmHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7807,8 +8575,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmHasSuffix = data
 		case "algorithmEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7816,8 +8582,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmEqualFold = data
 		case "algorithmContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("algorithmContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7825,8 +8589,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.AlgorithmContainsFold = data
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7834,8 +8596,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.Value = data
 		case "valueNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7843,8 +8603,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueNEQ = data
 		case "valueIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7852,8 +8610,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueIn = data
 		case "valueNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -7861,8 +8617,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueNotIn = data
 		case "valueGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7870,8 +8624,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueGT = data
 		case "valueGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7879,8 +8631,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueGTE = data
 		case "valueLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7888,8 +8638,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueLT = data
 		case "valueLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7897,8 +8645,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueLTE = data
 		case "valueContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7906,8 +8652,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueContains = data
 		case "valueHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7915,8 +8659,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueHasPrefix = data
 		case "valueHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7924,8 +8666,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueHasSuffix = data
 		case "valueEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7933,8 +8673,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueEqualFold = data
 		case "valueContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("valueContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -7942,8 +8680,6 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.ValueContainsFold = data
 		case "hasSubject":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubject"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -7951,14 +8687,305 @@ func (ec *executionContext) unmarshalInputSubjectDigestWhereInput(ctx context.Co
 			}
 			it.HasSubject = data
 		case "hasSubjectWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjectWith"))
-			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasSubjectWith = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSubjectScopeWhereInput(ctx context.Context, obj interface{}) (ent.SubjectScopeWhereInput, error) {
+	var it ent.SubjectScopeWhereInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "subject", "subjectNEQ", "subjectIn", "subjectNotIn", "subjectGT", "subjectGTE", "subjectLT", "subjectLTE", "subjectContains", "subjectHasPrefix", "subjectHasSuffix", "subjectEqualFold", "subjectContainsFold", "scope", "scopeNEQ", "scopeIn", "scopeNotIn", "scopeGT", "scopeGTE", "scopeLT", "scopeLTE", "scopeContains", "scopeHasPrefix", "scopeHasSuffix", "scopeEqualFold", "scopeContainsFold", "hasAttestationPolicy", "hasAttestationPolicyWith"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOSubjectScopeWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOSubjectScopeWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOSubjectScopeWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "idNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNEQ = data
+		case "idIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDIn = data
+		case "idNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNotIn = data
+		case "idGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGT = data
+		case "idGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGTE = data
+		case "idLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLT = data
+		case "idLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLTE = data
+		case "subject":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Subject = data
+		case "subjectNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectNEQ = data
+		case "subjectIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectIn = data
+		case "subjectNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectNotIn = data
+		case "subjectGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectGT = data
+		case "subjectGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectGTE = data
+		case "subjectLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectLT = data
+		case "subjectLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectLTE = data
+		case "subjectContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectContains = data
+		case "subjectHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectHasPrefix = data
+		case "subjectHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectHasSuffix = data
+		case "subjectEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectEqualFold = data
+		case "subjectContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subjectContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SubjectContainsFold = data
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "scopeNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeNEQ = data
+		case "scopeIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeIn = data
+		case "scopeNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeNotIn = data
+		case "scopeGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeGT = data
+		case "scopeGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeGTE = data
+		case "scopeLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeLT = data
+		case "scopeLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeLTE = data
+		case "scopeContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeContains = data
+		case "scopeHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeHasPrefix = data
+		case "scopeHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeHasSuffix = data
+		case "scopeEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeEqualFold = data
+		case "scopeContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopeContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopeContainsFold = data
+		case "hasAttestationPolicy":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationPolicy"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasAttestationPolicy = data
+		case "hasAttestationPolicyWith":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasAttestationPolicyWith"))
+			data, err := ec.unmarshalOAttestationPolicyWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasAttestationPolicyWith = data
 		}
 	}
 
@@ -7980,35 +9007,27 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInput(ctx, v)
+			data, err := ec.unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8016,8 +9035,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8025,8 +9042,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -8034,8 +9049,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -8043,8 +9056,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8052,8 +9063,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8061,8 +9070,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8070,8 +9077,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8079,8 +9084,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.IDLTE = data
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8088,8 +9091,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.Name = data
 		case "nameNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8097,8 +9098,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameNEQ = data
 		case "nameIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -8106,8 +9105,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameIn = data
 		case "nameNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -8115,8 +9112,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameNotIn = data
 		case "nameGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8124,8 +9119,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameGT = data
 		case "nameGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8133,8 +9126,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameGTE = data
 		case "nameLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8142,8 +9133,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameLT = data
 		case "nameLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8151,8 +9140,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameLTE = data
 		case "nameContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8160,8 +9147,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameContains = data
 		case "nameHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8169,8 +9154,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameHasPrefix = data
 		case "nameHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8178,8 +9161,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameHasSuffix = data
 		case "nameEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8187,8 +9168,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameEqualFold = data
 		case "nameContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nameContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8196,8 +9175,6 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.NameContainsFold = data
 		case "hasSubjectDigests":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjectDigests"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -8205,17 +9182,13 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.HasSubjectDigests = data
 		case "hasSubjectDigestsWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSubjectDigestsWith"))
-			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.HasSubjectDigestsWith = data
 		case "hasStatement":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatement"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -8223,10 +9196,8 @@ func (ec *executionContext) unmarshalInputSubjectWhereInput(ctx context.Context,
 			}
 			it.HasStatement = data
 		case "hasStatementWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasStatementWith"))
-			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8252,35 +9223,27 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 		}
 		switch k {
 		case "not":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
-			data, err := ec.unmarshalOTimestampWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInput(ctx, v)
+			data, err := ec.unmarshalOTimestampWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Not = data
 		case "and":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
-			data, err := ec.unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.And = data
 		case "or":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
-			data, err := ec.unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Or = data
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8288,8 +9251,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.ID = data
 		case "idNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8297,8 +9258,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDNEQ = data
 		case "idIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -8306,8 +9265,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDIn = data
 		case "idNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
 			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
 			if err != nil {
@@ -8315,8 +9272,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDNotIn = data
 		case "idGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8324,8 +9279,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDGT = data
 		case "idGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8333,8 +9286,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDGTE = data
 		case "idLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8342,8 +9293,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDLT = data
 		case "idLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
 			data, err := ec.unmarshalOID2ᚖint(ctx, v)
 			if err != nil {
@@ -8351,8 +9300,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.IDLTE = data
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8360,8 +9307,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.Type = data
 		case "typeNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeNEQ"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8369,8 +9314,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeNEQ = data
 		case "typeIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -8378,8 +9321,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeIn = data
 		case "typeNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeNotIn"))
 			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
@@ -8387,8 +9328,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeNotIn = data
 		case "typeGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeGT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8396,8 +9335,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeGT = data
 		case "typeGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeGTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8405,8 +9342,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeGTE = data
 		case "typeLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeLT"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8414,8 +9349,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeLT = data
 		case "typeLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeLTE"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8423,8 +9356,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeLTE = data
 		case "typeContains":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeContains"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8432,8 +9363,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeContains = data
 		case "typeHasPrefix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeHasPrefix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8441,8 +9370,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeHasPrefix = data
 		case "typeHasSuffix":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeHasSuffix"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8450,8 +9377,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeHasSuffix = data
 		case "typeEqualFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeEqualFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8459,8 +9384,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeEqualFold = data
 		case "typeContainsFold":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typeContainsFold"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -8468,8 +9391,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TypeContainsFold = data
 		case "timestamp":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestamp"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -8477,8 +9398,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.Timestamp = data
 		case "timestampNEQ":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampNEQ"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -8486,8 +9405,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampNEQ = data
 		case "timestampIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampIn"))
 			data, err := ec.unmarshalOTime2ᚕtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
@@ -8495,8 +9412,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampIn = data
 		case "timestampNotIn":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampNotIn"))
 			data, err := ec.unmarshalOTime2ᚕtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
@@ -8504,8 +9419,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampNotIn = data
 		case "timestampGT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampGT"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -8513,8 +9426,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampGT = data
 		case "timestampGTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampGTE"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -8522,8 +9433,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampGTE = data
 		case "timestampLT":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampLT"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -8531,8 +9440,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampLT = data
 		case "timestampLTE":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timestampLTE"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -8540,8 +9447,6 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.TimestampLTE = data
 		case "hasSignature":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSignature"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -8549,10 +9454,8 @@ func (ec *executionContext) unmarshalInputTimestampWhereInput(ctx context.Contex
 			}
 			it.HasSignature = data
 		case "hasSignatureWith":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasSignatureWith"))
-			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
+			data, err := ec.unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -8581,6 +9484,11 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._AttestationCollection(ctx, sel, obj)
+	case *ent.AttestationPolicy:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._AttestationPolicy(ctx, sel, obj)
 	case *ent.Dsse:
 		if obj == nil {
 			return graphql.Null
@@ -8611,6 +9519,11 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._SubjectDigest(ctx, sel, obj)
+	case *ent.SubjectScope:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._SubjectScope(ctx, sel, obj)
 	case *ent.Timestamp:
 		if obj == nil {
 			return graphql.Null
@@ -8795,6 +9708,203 @@ func (ec *executionContext) _AttestationCollection(ctx context.Context, sel ast.
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var attestationPolicyImplementors = []string{"AttestationPolicy", "Node"}
+
+func (ec *executionContext) _AttestationPolicy(ctx context.Context, sel ast.SelectionSet, obj *ent.AttestationPolicy) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, attestationPolicyImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AttestationPolicy")
+		case "id":
+			out.Values[i] = ec._AttestationPolicy_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "name":
+			out.Values[i] = ec._AttestationPolicy_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "subjectScopes":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AttestationPolicy_subjectScopes(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "statement":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AttestationPolicy_statement(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var attestationPolicyConnectionImplementors = []string{"AttestationPolicyConnection"}
+
+func (ec *executionContext) _AttestationPolicyConnection(ctx context.Context, sel ast.SelectionSet, obj *ent.AttestationPolicyConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, attestationPolicyConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AttestationPolicyConnection")
+		case "edges":
+			out.Values[i] = ec._AttestationPolicyConnection_edges(ctx, field, obj)
+		case "pageInfo":
+			out.Values[i] = ec._AttestationPolicyConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._AttestationPolicyConnection_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var attestationPolicyEdgeImplementors = []string{"AttestationPolicyEdge"}
+
+func (ec *executionContext) _AttestationPolicyEdge(ctx context.Context, sel ast.SelectionSet, obj *ent.AttestationPolicyEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, attestationPolicyEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AttestationPolicyEdge")
+		case "node":
+			out.Values[i] = ec._AttestationPolicyEdge_node(ctx, field, obj)
+		case "cursor":
+			out.Values[i] = ec._AttestationPolicyEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9243,6 +10353,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "attestationPolicies":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_attestationPolicies(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "dsses":
 			field := field
 
@@ -9464,6 +10596,42 @@ func (ec *executionContext) _Statement(ctx context.Context, sel ast.SelectionSet
 					}
 				}()
 				res = ec._Statement_subjects(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "policies":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Statement_policies(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -9835,6 +11003,88 @@ func (ec *executionContext) _SubjectEdge(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var subjectScopeImplementors = []string{"SubjectScope", "Node"}
+
+func (ec *executionContext) _SubjectScope(ctx context.Context, sel ast.SelectionSet, obj *ent.SubjectScope) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subjectScopeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SubjectScope")
+		case "id":
+			out.Values[i] = ec._SubjectScope_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "subject":
+			out.Values[i] = ec._SubjectScope_subject(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "scope":
+			out.Values[i] = ec._SubjectScope_scope(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "attestationPolicy":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SubjectScope_attestationPolicy(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10266,7 +11516,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAttestation2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestation(ctx context.Context, sel ast.SelectionSet, v *ent.Attestation) graphql.Marshaler {
+func (ec *executionContext) marshalNAttestation2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestation(ctx context.Context, sel ast.SelectionSet, v *ent.Attestation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10276,7 +11526,7 @@ func (ec *executionContext) marshalNAttestation2ᚖgithubᚗcomᚋtestifysecᚋa
 	return ec._Attestation(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAttestationCollection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollection(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationCollection) graphql.Marshaler {
+func (ec *executionContext) marshalNAttestationCollection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollection(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationCollection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10286,12 +11536,31 @@ func (ec *executionContext) marshalNAttestationCollection2ᚖgithubᚗcomᚋtest
 	return ec._AttestationCollection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAttestationCollectionWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx context.Context, v interface{}) (*ent.AttestationCollectionWhereInput, error) {
+func (ec *executionContext) unmarshalNAttestationCollectionWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx context.Context, v interface{}) (*ent.AttestationCollectionWhereInput, error) {
 	res, err := ec.unmarshalInputAttestationCollectionWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNAttestationWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInput(ctx context.Context, v interface{}) (*ent.AttestationWhereInput, error) {
+func (ec *executionContext) marshalNAttestationPolicyConnection2githubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyConnection(ctx context.Context, sel ast.SelectionSet, v ent.AttestationPolicyConnection) graphql.Marshaler {
+	return ec._AttestationPolicyConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAttestationPolicyConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyConnection(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationPolicyConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AttestationPolicyConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAttestationPolicyWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInput(ctx context.Context, v interface{}) (*ent.AttestationPolicyWhereInput, error) {
+	res, err := ec.unmarshalInputAttestationPolicyWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAttestationWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInput(ctx context.Context, v interface{}) (*ent.AttestationWhereInput, error) {
 	res, err := ec.unmarshalInputAttestationWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -10321,7 +11590,7 @@ func (ec *executionContext) marshalNCursor2entgoᚗioᚋcontribᚋentgqlᚐCurso
 	return v
 }
 
-func (ec *executionContext) marshalNDsse2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsse(ctx context.Context, sel ast.SelectionSet, v *ent.Dsse) graphql.Marshaler {
+func (ec *executionContext) marshalNDsse2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsse(ctx context.Context, sel ast.SelectionSet, v *ent.Dsse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10331,11 +11600,11 @@ func (ec *executionContext) marshalNDsse2ᚖgithubᚗcomᚋtestifysecᚋarchivis
 	return ec._Dsse(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDsseConnection2githubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseConnection(ctx context.Context, sel ast.SelectionSet, v ent.DsseConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNDsseConnection2githubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseConnection(ctx context.Context, sel ast.SelectionSet, v ent.DsseConnection) graphql.Marshaler {
 	return ec._DsseConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDsseConnection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseConnection(ctx context.Context, sel ast.SelectionSet, v *ent.DsseConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNDsseConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseConnection(ctx context.Context, sel ast.SelectionSet, v *ent.DsseConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10345,7 +11614,7 @@ func (ec *executionContext) marshalNDsseConnection2ᚖgithubᚗcomᚋtestifysec�
 	return ec._DsseConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNDsseWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInput(ctx context.Context, v interface{}) (*ent.DsseWhereInput, error) {
+func (ec *executionContext) unmarshalNDsseWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInput(ctx context.Context, v interface{}) (*ent.DsseWhereInput, error) {
 	res, err := ec.unmarshalInputDsseWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -10412,7 +11681,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
+func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10436,7 +11705,7 @@ func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋtestifysecᚋarchivis
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalONode2githubᚗcomᚋtestifysecᚋarchivistaᚋentᚐNoder(ctx, sel, v[i])
+			ret[i] = ec.marshalONode2githubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐNoder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10454,7 +11723,7 @@ func (ec *executionContext) marshalNPageInfo2entgoᚗioᚋcontribᚋentgqlᚐPag
 	return ec._PageInfo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPayloadDigest2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigest(ctx context.Context, sel ast.SelectionSet, v *ent.PayloadDigest) graphql.Marshaler {
+func (ec *executionContext) marshalNPayloadDigest2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigest(ctx context.Context, sel ast.SelectionSet, v *ent.PayloadDigest) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10464,12 +11733,12 @@ func (ec *executionContext) marshalNPayloadDigest2ᚖgithubᚗcomᚋtestifysec�
 	return ec._PayloadDigest(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPayloadDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx context.Context, v interface{}) (*ent.PayloadDigestWhereInput, error) {
+func (ec *executionContext) unmarshalNPayloadDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx context.Context, v interface{}) (*ent.PayloadDigestWhereInput, error) {
 	res, err := ec.unmarshalInputPayloadDigestWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSignature2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignature(ctx context.Context, sel ast.SelectionSet, v *ent.Signature) graphql.Marshaler {
+func (ec *executionContext) marshalNSignature2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignature(ctx context.Context, sel ast.SelectionSet, v *ent.Signature) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10479,12 +11748,12 @@ func (ec *executionContext) marshalNSignature2ᚖgithubᚗcomᚋtestifysecᚋarc
 	return ec._Signature(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSignatureWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInput(ctx context.Context, v interface{}) (*ent.SignatureWhereInput, error) {
+func (ec *executionContext) unmarshalNSignatureWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInput(ctx context.Context, v interface{}) (*ent.SignatureWhereInput, error) {
 	res, err := ec.unmarshalInputSignatureWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNStatement2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatement(ctx context.Context, sel ast.SelectionSet, v *ent.Statement) graphql.Marshaler {
+func (ec *executionContext) marshalNStatement2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatement(ctx context.Context, sel ast.SelectionSet, v *ent.Statement) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10494,7 +11763,7 @@ func (ec *executionContext) marshalNStatement2ᚖgithubᚗcomᚋtestifysecᚋarc
 	return ec._Statement(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNStatementWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInput(ctx context.Context, v interface{}) (*ent.StatementWhereInput, error) {
+func (ec *executionContext) unmarshalNStatementWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInput(ctx context.Context, v interface{}) (*ent.StatementWhereInput, error) {
 	res, err := ec.unmarshalInputStatementWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -10514,11 +11783,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNSubjectConnection2githubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectConnection(ctx context.Context, sel ast.SelectionSet, v ent.SubjectConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNSubjectConnection2githubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectConnection(ctx context.Context, sel ast.SelectionSet, v ent.SubjectConnection) graphql.Marshaler {
 	return ec._SubjectConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSubjectConnection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectConnection(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNSubjectConnection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectConnection(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10528,7 +11797,7 @@ func (ec *executionContext) marshalNSubjectConnection2ᚖgithubᚗcomᚋtestifys
 	return ec._SubjectConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSubjectDigest2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigest(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectDigest) graphql.Marshaler {
+func (ec *executionContext) marshalNSubjectDigest2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigest(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectDigest) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10538,12 +11807,27 @@ func (ec *executionContext) marshalNSubjectDigest2ᚖgithubᚗcomᚋtestifysec�
 	return ec._SubjectDigest(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSubjectDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx context.Context, v interface{}) (*ent.SubjectDigestWhereInput, error) {
+func (ec *executionContext) unmarshalNSubjectDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx context.Context, v interface{}) (*ent.SubjectDigestWhereInput, error) {
 	res, err := ec.unmarshalInputSubjectDigestWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNSubjectWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInput(ctx context.Context, v interface{}) (*ent.SubjectWhereInput, error) {
+func (ec *executionContext) marshalNSubjectScope2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScope(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectScope) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SubjectScope(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSubjectScopeWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInput(ctx context.Context, v interface{}) (*ent.SubjectScopeWhereInput, error) {
+	res, err := ec.unmarshalInputSubjectScopeWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNSubjectWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInput(ctx context.Context, v interface{}) (*ent.SubjectWhereInput, error) {
 	res, err := ec.unmarshalInputSubjectWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -10563,7 +11847,7 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalNTimestamp2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestamp(ctx context.Context, sel ast.SelectionSet, v *ent.Timestamp) graphql.Marshaler {
+func (ec *executionContext) marshalNTimestamp2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestamp(ctx context.Context, sel ast.SelectionSet, v *ent.Timestamp) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10573,7 +11857,7 @@ func (ec *executionContext) marshalNTimestamp2ᚖgithubᚗcomᚋtestifysecᚋarc
 	return ec._Timestamp(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNTimestampWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInput(ctx context.Context, v interface{}) (*ent.TimestampWhereInput, error) {
+func (ec *executionContext) unmarshalNTimestampWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInput(ctx context.Context, v interface{}) (*ent.TimestampWhereInput, error) {
 	res, err := ec.unmarshalInputTimestampWhereInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
@@ -10831,7 +12115,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAttestation2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Attestation) graphql.Marshaler {
+func (ec *executionContext) marshalOAttestation2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Attestation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10858,7 +12142,7 @@ func (ec *executionContext) marshalOAttestation2ᚕᚖgithubᚗcomᚋtestifysec�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAttestation2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestation(ctx, sel, v[i])
+			ret[i] = ec.marshalNAttestation2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestation(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10878,14 +12162,14 @@ func (ec *executionContext) marshalOAttestation2ᚕᚖgithubᚗcomᚋtestifysec�
 	return ret
 }
 
-func (ec *executionContext) marshalOAttestationCollection2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollection(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationCollection) graphql.Marshaler {
+func (ec *executionContext) marshalOAttestationCollection2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollection(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationCollection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._AttestationCollection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AttestationCollectionWhereInput, error) {
+func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AttestationCollectionWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10897,7 +12181,7 @@ func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚕᚖgith
 	res := make([]*ent.AttestationCollectionWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNAttestationCollectionWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAttestationCollectionWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -10905,7 +12189,7 @@ func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚕᚖgith
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx context.Context, v interface{}) (*ent.AttestationCollectionWhereInput, error) {
+func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationCollectionWhereInput(ctx context.Context, v interface{}) (*ent.AttestationCollectionWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10913,7 +12197,90 @@ func (ec *executionContext) unmarshalOAttestationCollectionWhereInput2ᚖgithub�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AttestationWhereInput, error) {
+func (ec *executionContext) marshalOAttestationPolicy2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicy(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationPolicy) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AttestationPolicy(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAttestationPolicyEdge2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.AttestationPolicyEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOAttestationPolicyEdge2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOAttestationPolicyEdge2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyEdge(ctx context.Context, sel ast.SelectionSet, v *ent.AttestationPolicyEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AttestationPolicyEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOAttestationPolicyWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AttestationPolicyWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*ent.AttestationPolicyWhereInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAttestationPolicyWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOAttestationPolicyWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationPolicyWhereInput(ctx context.Context, v interface{}) (*ent.AttestationPolicyWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAttestationPolicyWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.AttestationWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10925,7 +12292,7 @@ func (ec *executionContext) unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcom�
 	res := make([]*ent.AttestationWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNAttestationWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNAttestationWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -10933,7 +12300,7 @@ func (ec *executionContext) unmarshalOAttestationWhereInput2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOAttestationWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐAttestationWhereInput(ctx context.Context, v interface{}) (*ent.AttestationWhereInput, error) {
+func (ec *executionContext) unmarshalOAttestationWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐAttestationWhereInput(ctx context.Context, v interface{}) (*ent.AttestationWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10983,7 +12350,7 @@ func (ec *executionContext) marshalOCursor2ᚖentgoᚗioᚋcontribᚋentgqlᚐCu
 	return v
 }
 
-func (ec *executionContext) marshalODsse2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Dsse) graphql.Marshaler {
+func (ec *executionContext) marshalODsse2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Dsse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11010,7 +12377,7 @@ func (ec *executionContext) marshalODsse2ᚕᚖgithubᚗcomᚋtestifysecᚋarchi
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDsse2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsse(ctx, sel, v[i])
+			ret[i] = ec.marshalNDsse2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsse(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11030,14 +12397,14 @@ func (ec *executionContext) marshalODsse2ᚕᚖgithubᚗcomᚋtestifysecᚋarchi
 	return ret
 }
 
-func (ec *executionContext) marshalODsse2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsse(ctx context.Context, sel ast.SelectionSet, v *ent.Dsse) graphql.Marshaler {
+func (ec *executionContext) marshalODsse2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsse(ctx context.Context, sel ast.SelectionSet, v *ent.Dsse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Dsse(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalODsseEdge2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.DsseEdge) graphql.Marshaler {
+func (ec *executionContext) marshalODsseEdge2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.DsseEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11064,7 +12431,7 @@ func (ec *executionContext) marshalODsseEdge2ᚕᚖgithubᚗcomᚋtestifysecᚋa
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalODsseEdge2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalODsseEdge2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11078,14 +12445,14 @@ func (ec *executionContext) marshalODsseEdge2ᚕᚖgithubᚗcomᚋtestifysecᚋa
 	return ret
 }
 
-func (ec *executionContext) marshalODsseEdge2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseEdge(ctx context.Context, sel ast.SelectionSet, v *ent.DsseEdge) graphql.Marshaler {
+func (ec *executionContext) marshalODsseEdge2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseEdge(ctx context.Context, sel ast.SelectionSet, v *ent.DsseEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._DsseEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.DsseWhereInput, error) {
+func (ec *executionContext) unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.DsseWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11097,7 +12464,7 @@ func (ec *executionContext) unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestif
 	res := make([]*ent.DsseWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNDsseWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNDsseWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11105,7 +12472,7 @@ func (ec *executionContext) unmarshalODsseWhereInput2ᚕᚖgithubᚗcomᚋtestif
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalODsseWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐDsseWhereInput(ctx context.Context, v interface{}) (*ent.DsseWhereInput, error) {
+func (ec *executionContext) unmarshalODsseWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐDsseWhereInput(ctx context.Context, v interface{}) (*ent.DsseWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11183,14 +12550,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalONode2githubᚗcomᚋtestifysecᚋarchivistaᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v ent.Noder) graphql.Marshaler {
+func (ec *executionContext) marshalONode2githubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v ent.Noder) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Node(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPayloadDigest2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.PayloadDigest) graphql.Marshaler {
+func (ec *executionContext) marshalOPayloadDigest2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.PayloadDigest) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11217,7 +12584,7 @@ func (ec *executionContext) marshalOPayloadDigest2ᚕᚖgithubᚗcomᚋtestifyse
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPayloadDigest2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigest(ctx, sel, v[i])
+			ret[i] = ec.marshalNPayloadDigest2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigest(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11237,7 +12604,7 @@ func (ec *executionContext) marshalOPayloadDigest2ᚕᚖgithubᚗcomᚋtestifyse
 	return ret
 }
 
-func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.PayloadDigestWhereInput, error) {
+func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.PayloadDigestWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11249,7 +12616,7 @@ func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcom
 	res := make([]*ent.PayloadDigestWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNPayloadDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNPayloadDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11257,7 +12624,7 @@ func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚕᚖgithubᚗcom
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx context.Context, v interface{}) (*ent.PayloadDigestWhereInput, error) {
+func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐPayloadDigestWhereInput(ctx context.Context, v interface{}) (*ent.PayloadDigestWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11265,7 +12632,7 @@ func (ec *executionContext) unmarshalOPayloadDigestWhereInput2ᚖgithubᚗcomᚋ
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSignature2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Signature) graphql.Marshaler {
+func (ec *executionContext) marshalOSignature2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Signature) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11292,7 +12659,7 @@ func (ec *executionContext) marshalOSignature2ᚕᚖgithubᚗcomᚋtestifysecᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNSignature2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignature(ctx, sel, v[i])
+			ret[i] = ec.marshalNSignature2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignature(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11312,14 +12679,14 @@ func (ec *executionContext) marshalOSignature2ᚕᚖgithubᚗcomᚋtestifysecᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalOSignature2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignature(ctx context.Context, sel ast.SelectionSet, v *ent.Signature) graphql.Marshaler {
+func (ec *executionContext) marshalOSignature2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignature(ctx context.Context, sel ast.SelectionSet, v *ent.Signature) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Signature(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SignatureWhereInput, error) {
+func (ec *executionContext) unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SignatureWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11331,7 +12698,7 @@ func (ec *executionContext) unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋt
 	res := make([]*ent.SignatureWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNSignatureWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNSignatureWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11339,7 +12706,7 @@ func (ec *executionContext) unmarshalOSignatureWhereInput2ᚕᚖgithubᚗcomᚋt
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOSignatureWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSignatureWhereInput(ctx context.Context, v interface{}) (*ent.SignatureWhereInput, error) {
+func (ec *executionContext) unmarshalOSignatureWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSignatureWhereInput(ctx context.Context, v interface{}) (*ent.SignatureWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11347,14 +12714,14 @@ func (ec *executionContext) unmarshalOSignatureWhereInput2ᚖgithubᚗcomᚋtest
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOStatement2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatement(ctx context.Context, sel ast.SelectionSet, v *ent.Statement) graphql.Marshaler {
+func (ec *executionContext) marshalOStatement2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatement(ctx context.Context, sel ast.SelectionSet, v *ent.Statement) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Statement(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.StatementWhereInput, error) {
+func (ec *executionContext) unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.StatementWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11366,7 +12733,7 @@ func (ec *executionContext) unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋt
 	res := make([]*ent.StatementWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNStatementWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNStatementWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11374,7 +12741,7 @@ func (ec *executionContext) unmarshalOStatementWhereInput2ᚕᚖgithubᚗcomᚋt
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOStatementWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐStatementWhereInput(ctx context.Context, v interface{}) (*ent.StatementWhereInput, error) {
+func (ec *executionContext) unmarshalOStatementWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐStatementWhereInput(ctx context.Context, v interface{}) (*ent.StatementWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11436,14 +12803,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOSubject2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubject(ctx context.Context, sel ast.SelectionSet, v *ent.Subject) graphql.Marshaler {
+func (ec *executionContext) marshalOSubject2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubject(ctx context.Context, sel ast.SelectionSet, v *ent.Subject) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Subject(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOSubjectDigest2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.SubjectDigest) graphql.Marshaler {
+func (ec *executionContext) marshalOSubjectDigest2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.SubjectDigest) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11470,7 +12837,7 @@ func (ec *executionContext) marshalOSubjectDigest2ᚕᚖgithubᚗcomᚋtestifyse
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNSubjectDigest2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigest(ctx, sel, v[i])
+			ret[i] = ec.marshalNSubjectDigest2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigest(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11490,7 +12857,7 @@ func (ec *executionContext) marshalOSubjectDigest2ᚕᚖgithubᚗcomᚋtestifyse
 	return ret
 }
 
-func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SubjectDigestWhereInput, error) {
+func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SubjectDigestWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11502,7 +12869,7 @@ func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcom
 	res := make([]*ent.SubjectDigestWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNSubjectDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNSubjectDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11510,7 +12877,7 @@ func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚕᚖgithubᚗcom
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx context.Context, v interface{}) (*ent.SubjectDigestWhereInput, error) {
+func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectDigestWhereInput(ctx context.Context, v interface{}) (*ent.SubjectDigestWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11518,7 +12885,7 @@ func (ec *executionContext) unmarshalOSubjectDigestWhereInput2ᚖgithubᚗcomᚋ
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSubjectEdge2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.SubjectEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOSubjectEdge2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.SubjectEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11545,7 +12912,7 @@ func (ec *executionContext) marshalOSubjectEdge2ᚕᚖgithubᚗcomᚋtestifysec�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOSubjectEdge2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalOSubjectEdge2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11559,14 +12926,89 @@ func (ec *executionContext) marshalOSubjectEdge2ᚕᚖgithubᚗcomᚋtestifysec�
 	return ret
 }
 
-func (ec *executionContext) marshalOSubjectEdge2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectEdge(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOSubjectEdge2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectEdge(ctx context.Context, sel ast.SelectionSet, v *ent.SubjectEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._SubjectEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SubjectWhereInput, error) {
+func (ec *executionContext) marshalOSubjectScope2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.SubjectScope) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSubjectScope2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScope(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOSubjectScopeWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SubjectScopeWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*ent.SubjectScopeWhereInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNSubjectScopeWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOSubjectScopeWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectScopeWhereInput(ctx context.Context, v interface{}) (*ent.SubjectScopeWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputSubjectScopeWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.SubjectWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11578,7 +13020,7 @@ func (ec *executionContext) unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtes
 	res := make([]*ent.SubjectWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNSubjectWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNSubjectWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11586,7 +13028,7 @@ func (ec *executionContext) unmarshalOSubjectWhereInput2ᚕᚖgithubᚗcomᚋtes
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐSubjectWhereInput(ctx context.Context, v interface{}) (*ent.SubjectWhereInput, error) {
+func (ec *executionContext) unmarshalOSubjectWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐSubjectWhereInput(ctx context.Context, v interface{}) (*ent.SubjectWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11648,7 +13090,7 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return res
 }
 
-func (ec *executionContext) marshalOTimestamp2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Timestamp) graphql.Marshaler {
+func (ec *executionContext) marshalOTimestamp2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Timestamp) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11675,7 +13117,7 @@ func (ec *executionContext) marshalOTimestamp2ᚕᚖgithubᚗcomᚋtestifysecᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTimestamp2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestamp(ctx, sel, v[i])
+			ret[i] = ec.marshalNTimestamp2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestamp(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11695,7 +13137,7 @@ func (ec *executionContext) marshalOTimestamp2ᚕᚖgithubᚗcomᚋtestifysecᚋ
 	return ret
 }
 
-func (ec *executionContext) unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.TimestampWhereInput, error) {
+func (ec *executionContext) unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInputᚄ(ctx context.Context, v interface{}) ([]*ent.TimestampWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11707,7 +13149,7 @@ func (ec *executionContext) unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋt
 	res := make([]*ent.TimestampWhereInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNTimestampWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNTimestampWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -11715,7 +13157,7 @@ func (ec *executionContext) unmarshalOTimestampWhereInput2ᚕᚖgithubᚗcomᚋt
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalOTimestampWhereInput2ᚖgithubᚗcomᚋtestifysecᚋarchivistaᚋentᚐTimestampWhereInput(ctx context.Context, v interface{}) (*ent.TimestampWhereInput, error) {
+func (ec *executionContext) unmarshalOTimestampWhereInput2ᚖgithubᚗcomᚋinᚑtotoᚋarchivistaᚋentᚐTimestampWhereInput(ctx context.Context, v interface{}) (*ent.TimestampWhereInput, error) {
 	if v == nil {
 		return nil, nil
 	}

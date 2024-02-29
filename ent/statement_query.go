@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/in-toto/archivista/ent/attestationcollection"
+	"github.com/in-toto/archivista/ent/attestationpolicy"
 	"github.com/in-toto/archivista/ent/dsse"
 	"github.com/in-toto/archivista/ent/predicate"
 	"github.com/in-toto/archivista/ent/statement"
@@ -26,11 +27,13 @@ type StatementQuery struct {
 	inters                     []Interceptor
 	predicates                 []predicate.Statement
 	withSubjects               *SubjectQuery
+	withPolicies               *AttestationPolicyQuery
 	withAttestationCollections *AttestationCollectionQuery
 	withDsse                   *DsseQuery
 	modifiers                  []func(*sql.Selector)
 	loadTotal                  []func(context.Context, []*Statement) error
 	withNamedSubjects          map[string]*SubjectQuery
+	withNamedPolicies          map[string]*AttestationPolicyQuery
 	withNamedDsse              map[string]*DsseQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -83,6 +86,28 @@ func (sq *StatementQuery) QuerySubjects() *SubjectQuery {
 			sqlgraph.From(statement.Table, statement.FieldID, selector),
 			sqlgraph.To(subject.Table, subject.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, statement.SubjectsTable, statement.SubjectsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPolicies chains the current query on the "policies" edge.
+func (sq *StatementQuery) QueryPolicies() *AttestationPolicyQuery {
+	query := (&AttestationPolicyClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(statement.Table, statement.FieldID, selector),
+			sqlgraph.To(attestationpolicy.Table, attestationpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, statement.PoliciesTable, statement.PoliciesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -327,6 +352,7 @@ func (sq *StatementQuery) Clone() *StatementQuery {
 		inters:                     append([]Interceptor{}, sq.inters...),
 		predicates:                 append([]predicate.Statement{}, sq.predicates...),
 		withSubjects:               sq.withSubjects.Clone(),
+		withPolicies:               sq.withPolicies.Clone(),
 		withAttestationCollections: sq.withAttestationCollections.Clone(),
 		withDsse:                   sq.withDsse.Clone(),
 		// clone intermediate query.
@@ -343,6 +369,17 @@ func (sq *StatementQuery) WithSubjects(opts ...func(*SubjectQuery)) *StatementQu
 		opt(query)
 	}
 	sq.withSubjects = query
+	return sq
+}
+
+// WithPolicies tells the query-builder to eager-load the nodes that are connected to
+// the "policies" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *StatementQuery) WithPolicies(opts ...func(*AttestationPolicyQuery)) *StatementQuery {
+	query := (&AttestationPolicyClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withPolicies = query
 	return sq
 }
 
@@ -446,8 +483,9 @@ func (sq *StatementQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 	var (
 		nodes       = []*Statement{}
 		_spec       = sq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			sq.withSubjects != nil,
+			sq.withPolicies != nil,
 			sq.withAttestationCollections != nil,
 			sq.withDsse != nil,
 		}
@@ -480,6 +518,13 @@ func (sq *StatementQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 			return nil, err
 		}
 	}
+	if query := sq.withPolicies; query != nil {
+		if err := sq.loadPolicies(ctx, query, nodes,
+			func(n *Statement) { n.Edges.Policies = []*AttestationPolicy{} },
+			func(n *Statement, e *AttestationPolicy) { n.Edges.Policies = append(n.Edges.Policies, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := sq.withAttestationCollections; query != nil {
 		if err := sq.loadAttestationCollections(ctx, query, nodes, nil,
 			func(n *Statement, e *AttestationCollection) { n.Edges.AttestationCollections = e }); err != nil {
@@ -497,6 +542,13 @@ func (sq *StatementQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 		if err := sq.loadSubjects(ctx, query, nodes,
 			func(n *Statement) { n.appendNamedSubjects(name) },
 			func(n *Statement, e *Subject) { n.appendNamedSubjects(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range sq.withNamedPolicies {
+		if err := sq.loadPolicies(ctx, query, nodes,
+			func(n *Statement) { n.appendNamedPolicies(name) },
+			func(n *Statement, e *AttestationPolicy) { n.appendNamedPolicies(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -541,6 +593,37 @@ func (sq *StatementQuery) loadSubjects(ctx context.Context, query *SubjectQuery,
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "statement_subjects" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (sq *StatementQuery) loadPolicies(ctx context.Context, query *AttestationPolicyQuery, nodes []*Statement, init func(*Statement), assign func(*Statement, *AttestationPolicy)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Statement)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AttestationPolicy(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(statement.PoliciesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.statement_policies
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "statement_policies" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "statement_policies" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -701,6 +784,20 @@ func (sq *StatementQuery) WithNamedSubjects(name string, opts ...func(*SubjectQu
 		sq.withNamedSubjects = make(map[string]*SubjectQuery)
 	}
 	sq.withNamedSubjects[name] = query
+	return sq
+}
+
+// WithNamedPolicies tells the query-builder to eager-load the nodes that are connected to the "policies"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (sq *StatementQuery) WithNamedPolicies(name string, opts ...func(*AttestationPolicyQuery)) *StatementQuery {
+	query := (&AttestationPolicyClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if sq.withNamedPolicies == nil {
+		sq.withNamedPolicies = make(map[string]*AttestationPolicyQuery)
+	}
+	sq.withNamedPolicies[name] = query
 	return sq
 }
 

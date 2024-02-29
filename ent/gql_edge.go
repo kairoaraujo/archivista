@@ -36,6 +36,26 @@ func (ac *AttestationCollection) Statement(ctx context.Context) (*Statement, err
 	return result, err
 }
 
+func (ap *AttestationPolicy) SubjectScopes(ctx context.Context) (result []*SubjectScope, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = ap.NamedSubjectScopes(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = ap.Edges.SubjectScopesOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = ap.QuerySubjectScopes().All(ctx)
+	}
+	return result, err
+}
+
+func (ap *AttestationPolicy) Statement(ctx context.Context) (*Statement, error) {
+	result, err := ap.Edges.StatementOrErr()
+	if IsNotLoaded(err) {
+		result, err = ap.QueryStatement().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (d *Dsse) Statement(ctx context.Context) (*Statement, error) {
 	result, err := d.Edges.StatementOrErr()
 	if IsNotLoaded(err) {
@@ -116,6 +136,26 @@ func (s *Statement) Subjects(
 	return s.QuerySubjects().Paginate(ctx, after, first, before, last, opts...)
 }
 
+func (s *Statement) Policies(
+	ctx context.Context, after *Cursor, first *int, before *Cursor, last *int, where *AttestationPolicyWhereInput,
+) (*AttestationPolicyConnection, error) {
+	opts := []AttestationPolicyPaginateOption{
+		WithAttestationPolicyFilter(where.Filter),
+	}
+	alias := graphql.GetFieldContext(ctx).Field.Alias
+	totalCount, hasTotalCount := s.Edges.totalCount[1][alias]
+	if nodes, err := s.NamedPolicies(alias); err == nil || hasTotalCount {
+		pager, err := newAttestationPolicyPager(opts, last != nil)
+		if err != nil {
+			return nil, err
+		}
+		conn := &AttestationPolicyConnection{Edges: []*AttestationPolicyEdge{}, TotalCount: totalCount}
+		conn.build(nodes, pager, after, first, before, last)
+		return conn, nil
+	}
+	return s.QueryPolicies().Paginate(ctx, after, first, before, last, opts...)
+}
+
 func (s *Statement) AttestationCollections(ctx context.Context) (*AttestationCollection, error) {
 	result, err := s.Edges.AttestationCollectionsOrErr()
 	if IsNotLoaded(err) {
@@ -160,6 +200,14 @@ func (sd *SubjectDigest) Subject(ctx context.Context) (*Subject, error) {
 	result, err := sd.Edges.SubjectOrErr()
 	if IsNotLoaded(err) {
 		result, err = sd.QuerySubject().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (ss *SubjectScope) AttestationPolicy(ctx context.Context) (*AttestationPolicy, error) {
+	result, err := ss.Edges.AttestationPolicyOrErr()
+	if IsNotLoaded(err) {
+		result, err = ss.QueryAttestationPolicy().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }

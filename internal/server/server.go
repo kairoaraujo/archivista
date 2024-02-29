@@ -149,6 +149,7 @@ func (s *Server) Upload(ctx context.Context, r io.Reader) (api.UploadResponse, e
 	if err != nil {
 		return api.UploadResponse{}, err
 	}
+	logrus.Info(string(payload))
 
 	gid, err := gitoid.New(bytes.NewReader(payload), gitoid.WithContentLength(int64(len(payload))), gitoid.WithSha256())
 	if err != nil {

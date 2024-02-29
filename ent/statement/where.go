@@ -146,6 +146,29 @@ func HasSubjectsWith(preds ...predicate.Subject) predicate.Statement {
 	})
 }
 
+// HasPolicies applies the HasEdge predicate on the "policies" edge.
+func HasPolicies() predicate.Statement {
+	return predicate.Statement(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PoliciesTable, PoliciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPoliciesWith applies the HasEdge predicate on the "policies" edge with a given conditions (other predicates).
+func HasPoliciesWith(preds ...predicate.AttestationPolicy) predicate.Statement {
+	return predicate.Statement(func(s *sql.Selector) {
+		step := newPoliciesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasAttestationCollections applies the HasEdge predicate on the "attestation_collections" edge.
 func HasAttestationCollections() predicate.Statement {
 	return predicate.Statement(func(s *sql.Selector) {

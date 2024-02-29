@@ -62,6 +62,33 @@ var (
 			},
 		},
 	}
+	// AttestationPoliciesColumns holds the columns for the "attestation_policies" table.
+	AttestationPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "statement_policies", Type: field.TypeInt, Nullable: true},
+	}
+	// AttestationPoliciesTable holds the schema information for the "attestation_policies" table.
+	AttestationPoliciesTable = &schema.Table{
+		Name:       "attestation_policies",
+		Columns:    AttestationPoliciesColumns,
+		PrimaryKey: []*schema.Column{AttestationPoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "attestation_policies_statements_policies",
+				Columns:    []*schema.Column{AttestationPoliciesColumns[2]},
+				RefColumns: []*schema.Column{StatementsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "attestationpolicy_name",
+				Unique:  false,
+				Columns: []*schema.Column{AttestationPoliciesColumns[1]},
+			},
+		},
+	}
 	// DssesColumns holds the columns for the "dsses" table.
 	DssesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -212,6 +239,34 @@ var (
 			},
 		},
 	}
+	// SubjectScopesColumns holds the columns for the "subject_scopes" table.
+	SubjectScopesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "subject", Type: field.TypeString},
+		{Name: "scope", Type: field.TypeString},
+		{Name: "attestation_policy_subject_scopes", Type: field.TypeInt, Nullable: true},
+	}
+	// SubjectScopesTable holds the schema information for the "subject_scopes" table.
+	SubjectScopesTable = &schema.Table{
+		Name:       "subject_scopes",
+		Columns:    SubjectScopesColumns,
+		PrimaryKey: []*schema.Column{SubjectScopesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subject_scopes_attestation_policies_subject_scopes",
+				Columns:    []*schema.Column{SubjectScopesColumns[3]},
+				RefColumns: []*schema.Column{AttestationPoliciesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subjectscope_subject",
+				Unique:  false,
+				Columns: []*schema.Column{SubjectScopesColumns[1]},
+			},
+		},
+	}
 	// TimestampsColumns holds the columns for the "timestamps" table.
 	TimestampsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -237,12 +292,14 @@ var (
 	Tables = []*schema.Table{
 		AttestationsTable,
 		AttestationCollectionsTable,
+		AttestationPoliciesTable,
 		DssesTable,
 		PayloadDigestsTable,
 		SignaturesTable,
 		StatementsTable,
 		SubjectsTable,
 		SubjectDigestsTable,
+		SubjectScopesTable,
 		TimestampsTable,
 	}
 )
@@ -250,10 +307,12 @@ var (
 func init() {
 	AttestationsTable.ForeignKeys[0].RefTable = AttestationCollectionsTable
 	AttestationCollectionsTable.ForeignKeys[0].RefTable = StatementsTable
+	AttestationPoliciesTable.ForeignKeys[0].RefTable = StatementsTable
 	DssesTable.ForeignKeys[0].RefTable = StatementsTable
 	PayloadDigestsTable.ForeignKeys[0].RefTable = DssesTable
 	SignaturesTable.ForeignKeys[0].RefTable = DssesTable
 	SubjectsTable.ForeignKeys[0].RefTable = StatementsTable
 	SubjectDigestsTable.ForeignKeys[0].RefTable = SubjectsTable
+	SubjectScopesTable.ForeignKeys[0].RefTable = AttestationPoliciesTable
 	TimestampsTable.ForeignKeys[0].RefTable = SignaturesTable
 }

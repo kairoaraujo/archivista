@@ -16,6 +16,8 @@ const (
 	FieldPredicate = "predicate"
 	// EdgeSubjects holds the string denoting the subjects edge name in mutations.
 	EdgeSubjects = "subjects"
+	// EdgePolicies holds the string denoting the policies edge name in mutations.
+	EdgePolicies = "policies"
 	// EdgeAttestationCollections holds the string denoting the attestation_collections edge name in mutations.
 	EdgeAttestationCollections = "attestation_collections"
 	// EdgeDsse holds the string denoting the dsse edge name in mutations.
@@ -29,6 +31,13 @@ const (
 	SubjectsInverseTable = "subjects"
 	// SubjectsColumn is the table column denoting the subjects relation/edge.
 	SubjectsColumn = "statement_subjects"
+	// PoliciesTable is the table that holds the policies relation/edge.
+	PoliciesTable = "attestation_policies"
+	// PoliciesInverseTable is the table name for the AttestationPolicy entity.
+	// It exists in this package in order to avoid circular dependency with the "attestationpolicy" package.
+	PoliciesInverseTable = "attestation_policies"
+	// PoliciesColumn is the table column denoting the policies relation/edge.
+	PoliciesColumn = "statement_policies"
 	// AttestationCollectionsTable is the table that holds the attestation_collections relation/edge.
 	AttestationCollectionsTable = "attestation_collections"
 	// AttestationCollectionsInverseTable is the table name for the AttestationCollection entity.
@@ -93,6 +102,20 @@ func BySubjects(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByPoliciesCount orders the results by policies count.
+func ByPoliciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPoliciesStep(), opts...)
+	}
+}
+
+// ByPolicies orders the results by policies terms.
+func ByPolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByAttestationCollectionsField orders the results by attestation_collections field.
 func ByAttestationCollectionsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -118,6 +141,13 @@ func newSubjectsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SubjectsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SubjectsTable, SubjectsColumn),
+	)
+}
+func newPoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PoliciesTable, PoliciesColumn),
 	)
 }
 func newAttestationCollectionsStep() *sqlgraph.Step {

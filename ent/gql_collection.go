@@ -11,12 +11,14 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/in-toto/archivista/ent/attestation"
 	"github.com/in-toto/archivista/ent/attestationcollection"
+	"github.com/in-toto/archivista/ent/attestationpolicy"
 	"github.com/in-toto/archivista/ent/dsse"
 	"github.com/in-toto/archivista/ent/payloaddigest"
 	"github.com/in-toto/archivista/ent/signature"
 	"github.com/in-toto/archivista/ent/statement"
 	"github.com/in-toto/archivista/ent/subject"
 	"github.com/in-toto/archivista/ent/subjectdigest"
+	"github.com/in-toto/archivista/ent/subjectscope"
 	"github.com/in-toto/archivista/ent/timestamp"
 )
 
@@ -182,6 +184,95 @@ func newAttestationCollectionPaginateArgs(rv map[string]any) *attestationcollect
 	}
 	if v, ok := rv[whereField].(*AttestationCollectionWhereInput); ok {
 		args.opts = append(args.opts, WithAttestationCollectionFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (ap *AttestationPolicyQuery) CollectFields(ctx context.Context, satisfies ...string) (*AttestationPolicyQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return ap, nil
+	}
+	if err := ap.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return ap, nil
+}
+
+func (ap *AttestationPolicyQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(attestationpolicy.Columns))
+		selectedFields = []string{attestationpolicy.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "subjectScopes":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&SubjectScopeClient{config: ap.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			ap.WithNamedSubjectScopes(alias, func(wq *SubjectScopeQuery) {
+				*wq = *query
+			})
+		case "statement":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&StatementClient{config: ap.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			ap.withStatement = query
+		case "name":
+			if _, ok := fieldSeen[attestationpolicy.FieldName]; !ok {
+				selectedFields = append(selectedFields, attestationpolicy.FieldName)
+				fieldSeen[attestationpolicy.FieldName] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		ap.Select(selectedFields...)
+	}
+	return nil
+}
+
+type attestationpolicyPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []AttestationPolicyPaginateOption
+}
+
+func newAttestationPolicyPaginateArgs(rv map[string]any) *attestationpolicyPaginateArgs {
+	args := &attestationpolicyPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*AttestationPolicyWhereInput); ok {
+		args.opts = append(args.opts, WithAttestationPolicyFilter(v.Filter))
 	}
 	return args
 }
@@ -573,6 +664,90 @@ func (s *StatementQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 			s.WithNamedSubjects(alias, func(wq *SubjectQuery) {
 				*wq = *query
 			})
+		case "policies":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&AttestationPolicyClient{config: s.config}).Query()
+			)
+			args := newAttestationPolicyPaginateArgs(fieldArgs(ctx, new(AttestationPolicyWhereInput), path...))
+			if err := validateFirstLast(args.first, args.last); err != nil {
+				return fmt.Errorf("validate first and last in path %q: %w", path, err)
+			}
+			pager, err := newAttestationPolicyPager(args.opts, args.last != nil)
+			if err != nil {
+				return fmt.Errorf("create new pager in path %q: %w", path, err)
+			}
+			if query, err = pager.applyFilter(query); err != nil {
+				return err
+			}
+			ignoredEdges := !hasCollectedField(ctx, append(path, edgesField)...)
+			if hasCollectedField(ctx, append(path, totalCountField)...) || hasCollectedField(ctx, append(path, pageInfoField)...) {
+				hasPagination := args.after != nil || args.first != nil || args.before != nil || args.last != nil
+				if hasPagination || ignoredEdges {
+					query := query.Clone()
+					s.loadTotal = append(s.loadTotal, func(ctx context.Context, nodes []*Statement) error {
+						ids := make([]driver.Value, len(nodes))
+						for i := range nodes {
+							ids[i] = nodes[i].ID
+						}
+						var v []struct {
+							NodeID int `sql:"statement_policies"`
+							Count  int `sql:"count"`
+						}
+						query.Where(func(s *sql.Selector) {
+							s.Where(sql.InValues(s.C(statement.PoliciesColumn), ids...))
+						})
+						if err := query.GroupBy(statement.PoliciesColumn).Aggregate(Count()).Scan(ctx, &v); err != nil {
+							return err
+						}
+						m := make(map[int]int, len(v))
+						for i := range v {
+							m[v[i].NodeID] = v[i].Count
+						}
+						for i := range nodes {
+							n := m[nodes[i].ID]
+							if nodes[i].Edges.totalCount[1] == nil {
+								nodes[i].Edges.totalCount[1] = make(map[string]int)
+							}
+							nodes[i].Edges.totalCount[1][alias] = n
+						}
+						return nil
+					})
+				} else {
+					s.loadTotal = append(s.loadTotal, func(_ context.Context, nodes []*Statement) error {
+						for i := range nodes {
+							n := len(nodes[i].Edges.Policies)
+							if nodes[i].Edges.totalCount[1] == nil {
+								nodes[i].Edges.totalCount[1] = make(map[string]int)
+							}
+							nodes[i].Edges.totalCount[1][alias] = n
+						}
+						return nil
+					})
+				}
+			}
+			if ignoredEdges || (args.first != nil && *args.first == 0) || (args.last != nil && *args.last == 0) {
+				continue
+			}
+			if query, err = pager.applyCursors(query, args.after, args.before); err != nil {
+				return err
+			}
+			path = append(path, edgesField, nodeField)
+			if field := collectedField(ctx, path...); field != nil {
+				if err := query.collectField(ctx, opCtx, *field, path, mayAddCondition(satisfies, "AttestationPolicy")...); err != nil {
+					return err
+				}
+			}
+			if limit := paginateLimit(args.first, args.last); limit > 0 {
+				modify := limitRows(statement.PoliciesColumn, limit, pager.orderExpr(query))
+				query.modifiers = append(query.modifiers, modify)
+			} else {
+				query = pager.applyOrder(query)
+			}
+			s.WithNamedPolicies(alias, func(wq *AttestationPolicyQuery) {
+				*wq = *query
+			})
 		case "attestationCollections":
 			var (
 				alias = field.Alias
@@ -808,6 +983,88 @@ func newSubjectDigestPaginateArgs(rv map[string]any) *subjectdigestPaginateArgs 
 	}
 	if v, ok := rv[whereField].(*SubjectDigestWhereInput); ok {
 		args.opts = append(args.opts, WithSubjectDigestFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (ss *SubjectScopeQuery) CollectFields(ctx context.Context, satisfies ...string) (*SubjectScopeQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return ss, nil
+	}
+	if err := ss.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return ss, nil
+}
+
+func (ss *SubjectScopeQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(subjectscope.Columns))
+		selectedFields = []string{subjectscope.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "attestationPolicy":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = (&AttestationPolicyClient{config: ss.config}).Query()
+			)
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
+				return err
+			}
+			ss.withAttestationPolicy = query
+		case "subject":
+			if _, ok := fieldSeen[subjectscope.FieldSubject]; !ok {
+				selectedFields = append(selectedFields, subjectscope.FieldSubject)
+				fieldSeen[subjectscope.FieldSubject] = struct{}{}
+			}
+		case "scope":
+			if _, ok := fieldSeen[subjectscope.FieldScope]; !ok {
+				selectedFields = append(selectedFields, subjectscope.FieldScope)
+				fieldSeen[subjectscope.FieldScope] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		ss.Select(selectedFields...)
+	}
+	return nil
+}
+
+type subjectscopePaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []SubjectScopePaginateOption
+}
+
+func newSubjectScopePaginateArgs(rv map[string]any) *subjectscopePaginateArgs {
+	args := &subjectscopePaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*SubjectScopeWhereInput); ok {
+		args.opts = append(args.opts, WithSubjectScopeFilter(v.Filter))
 	}
 	return args
 }

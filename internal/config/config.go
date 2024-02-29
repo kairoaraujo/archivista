@@ -54,6 +54,8 @@ type Config struct {
 
 	EnableArtifactStore bool   `default:"FALSE" desc:"*** Enable Artifact Store Endpoints" split_words:"true"`
 	ArtifactStoreConfig string `default:"/tmp/artifacts/config.yaml" desc:"Location of the config describing available artifacts" split_words:"true"`
+
+	TUFEndpoint string `default:"" desc:"URL endpoint for TUF server" split_words:"true"`
 }
 
 // Process reads config from env

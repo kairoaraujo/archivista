@@ -12,6 +12,9 @@ type Attestation func(*sql.Selector)
 // AttestationCollection is the predicate function for attestationcollection builders.
 type AttestationCollection func(*sql.Selector)
 
+// AttestationPolicy is the predicate function for attestationpolicy builders.
+type AttestationPolicy func(*sql.Selector)
+
 // Dsse is the predicate function for dsse builders.
 type Dsse func(*sql.Selector)
 
@@ -29,6 +32,9 @@ type Subject func(*sql.Selector)
 
 // SubjectDigest is the predicate function for subjectdigest builders.
 type SubjectDigest func(*sql.Selector)
+
+// SubjectScope is the predicate function for subjectscope builders.
+type SubjectScope func(*sql.Selector)
 
 // Timestamp is the predicate function for timestamp builders.
 type Timestamp func(*sql.Selector)

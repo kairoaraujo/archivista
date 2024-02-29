@@ -1,0 +1,93 @@
+{
+  "settings": {
+    "expiration": {
+      "root": 365,
+      "targets": 365,
+      "snapshot": 1,
+      "timestamp": 1,
+      "bins": 1
+    },
+    "services": {
+      "number_of_delegated_bins": 2,
+      "targets_base_url": "NA/",
+      "targets_online_key": true
+    }
+  },
+  "metadata": {
+    "root": {
+      "signatures": [
+        {
+          "keyid": "1cebe343e35f0213f6136758e6c3a8f8e1f9eeb7e47a07d5cb336462ed31dcb7",
+          "sig": "bebcaab5d78131bb730fdc2190ccb1f7a2e5c1539a1f1f5d298b914ee7c09e4e8e2b949e0a05c48babc3e27d9b1ac302a6748a0b297c3fa38a1e4208b4837d08"
+        },
+        {
+          "keyid": "800dfb5a1982b82b7893e58035e19f414f553fc08cbb1130cfbae302a7b7fee5",
+          "sig": "a49f455af3dec6f9980d260d95215fc95e56e13529a71242aff585766a018ee13f6361f7d13ffc52c9b0bfafb9f016dadfac50fa3862a5eb2bde80454b2f380c"
+        }
+      ],
+      "signed": {
+        "_type": "root",
+        "version": 1,
+        "spec_version": "1.0.31",
+        "expires": "2025-02-16T09:38:00Z",
+        "x-archivista-url": "http://127.0.0.1:8082",
+        "x-archivista-metadata": "http://127.0.0.1:8080",
+        "consistent_snapshot": true,
+        "keys": {
+          "1cebe343e35f0213f6136758e6c3a8f8e1f9eeb7e47a07d5cb336462ed31dcb7": {
+            "keytype": "ed25519",
+            "scheme": "ed25519",
+            "keyval": {
+              "public": "ad1709b3cb419b99c5cd7427d6411522e5a93aec6767453e91af921a73d22a3c"
+            },
+            "name": "jj@testifysec.com"
+          },
+          "800dfb5a1982b82b7893e58035e19f414f553fc08cbb1130cfbae302a7b7fee5": {
+            "keytype": "ed25519",
+            "scheme": "ed25519",
+            "keyval": {
+              "public": "7098f769f6ab8502b50f3b58686b8a042d5d3bb75d8b3a48a2fcbc15a0223501"
+            },
+            "name": "jh@testifysec.com"
+          },
+          "d519bacab2ad63d81621bfeb1bd4fb1b018f09b9f8d692532f555677ef513ae3": {
+            "keytype": "ed25519",
+            "scheme": "ed25519",
+            "keyval": {
+              "public": "d519bacab2ad63d81621bfeb1bd4fb1b018f09b9f8d692532f555677ef513ae3"
+            },
+            "name": "kms-v1",
+            "x-rstuf-online-key-uri": "fn:d519bacab2ad63d81621bfeb1bd4fb1b018f09b9f8d692532f555677ef513ae3"
+          }
+        },
+        "roles": {
+          "root": {
+            "keyids": [
+              "1cebe343e35f0213f6136758e6c3a8f8e1f9eeb7e47a07d5cb336462ed31dcb7",
+              "800dfb5a1982b82b7893e58035e19f414f553fc08cbb1130cfbae302a7b7fee5"
+            ],
+            "threshold": 1
+          },
+          "timestamp": {
+            "keyids": [
+              "d519bacab2ad63d81621bfeb1bd4fb1b018f09b9f8d692532f555677ef513ae3"
+            ],
+            "threshold": 1
+          },
+          "snapshot": {
+            "keyids": [
+              "d519bacab2ad63d81621bfeb1bd4fb1b018f09b9f8d692532f555677ef513ae3"
+            ],
+            "threshold": 1
+          },
+          "targets": {
+            "keyids": [
+              "d519bacab2ad63d81621bfeb1bd4fb1b018f09b9f8d692532f555677ef513ae3"
+            ],
+            "threshold": 1
+          }
+        }
+      }
+    }
+  }
+}

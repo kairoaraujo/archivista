@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/in-toto/archivista/ent/attestationcollection"
+	"github.com/in-toto/archivista/ent/attestationpolicy"
 	"github.com/in-toto/archivista/ent/dsse"
 	"github.com/in-toto/archivista/ent/predicate"
 	"github.com/in-toto/archivista/ent/statement"
@@ -57,6 +58,21 @@ func (su *StatementUpdate) AddSubjects(s ...*Subject) *StatementUpdate {
 		ids[i] = s[i].ID
 	}
 	return su.AddSubjectIDs(ids...)
+}
+
+// AddPolicyIDs adds the "policies" edge to the AttestationPolicy entity by IDs.
+func (su *StatementUpdate) AddPolicyIDs(ids ...int) *StatementUpdate {
+	su.mutation.AddPolicyIDs(ids...)
+	return su
+}
+
+// AddPolicies adds the "policies" edges to the AttestationPolicy entity.
+func (su *StatementUpdate) AddPolicies(a ...*AttestationPolicy) *StatementUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return su.AddPolicyIDs(ids...)
 }
 
 // SetAttestationCollectionsID sets the "attestation_collections" edge to the AttestationCollection entity by ID.
@@ -117,6 +133,27 @@ func (su *StatementUpdate) RemoveSubjects(s ...*Subject) *StatementUpdate {
 		ids[i] = s[i].ID
 	}
 	return su.RemoveSubjectIDs(ids...)
+}
+
+// ClearPolicies clears all "policies" edges to the AttestationPolicy entity.
+func (su *StatementUpdate) ClearPolicies() *StatementUpdate {
+	su.mutation.ClearPolicies()
+	return su
+}
+
+// RemovePolicyIDs removes the "policies" edge to AttestationPolicy entities by IDs.
+func (su *StatementUpdate) RemovePolicyIDs(ids ...int) *StatementUpdate {
+	su.mutation.RemovePolicyIDs(ids...)
+	return su
+}
+
+// RemovePolicies removes "policies" edges to AttestationPolicy entities.
+func (su *StatementUpdate) RemovePolicies(a ...*AttestationPolicy) *StatementUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return su.RemovePolicyIDs(ids...)
 }
 
 // ClearAttestationCollections clears the "attestation_collections" edge to the AttestationCollection entity.
@@ -236,6 +273,51 @@ func (su *StatementUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if su.mutation.PoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.RemovedPoliciesIDs(); len(nodes) > 0 && !su.mutation.PoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.PoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -366,6 +448,21 @@ func (suo *StatementUpdateOne) AddSubjects(s ...*Subject) *StatementUpdateOne {
 	return suo.AddSubjectIDs(ids...)
 }
 
+// AddPolicyIDs adds the "policies" edge to the AttestationPolicy entity by IDs.
+func (suo *StatementUpdateOne) AddPolicyIDs(ids ...int) *StatementUpdateOne {
+	suo.mutation.AddPolicyIDs(ids...)
+	return suo
+}
+
+// AddPolicies adds the "policies" edges to the AttestationPolicy entity.
+func (suo *StatementUpdateOne) AddPolicies(a ...*AttestationPolicy) *StatementUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return suo.AddPolicyIDs(ids...)
+}
+
 // SetAttestationCollectionsID sets the "attestation_collections" edge to the AttestationCollection entity by ID.
 func (suo *StatementUpdateOne) SetAttestationCollectionsID(id int) *StatementUpdateOne {
 	suo.mutation.SetAttestationCollectionsID(id)
@@ -424,6 +521,27 @@ func (suo *StatementUpdateOne) RemoveSubjects(s ...*Subject) *StatementUpdateOne
 		ids[i] = s[i].ID
 	}
 	return suo.RemoveSubjectIDs(ids...)
+}
+
+// ClearPolicies clears all "policies" edges to the AttestationPolicy entity.
+func (suo *StatementUpdateOne) ClearPolicies() *StatementUpdateOne {
+	suo.mutation.ClearPolicies()
+	return suo
+}
+
+// RemovePolicyIDs removes the "policies" edge to AttestationPolicy entities by IDs.
+func (suo *StatementUpdateOne) RemovePolicyIDs(ids ...int) *StatementUpdateOne {
+	suo.mutation.RemovePolicyIDs(ids...)
+	return suo
+}
+
+// RemovePolicies removes "policies" edges to AttestationPolicy entities.
+func (suo *StatementUpdateOne) RemovePolicies(a ...*AttestationPolicy) *StatementUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return suo.RemovePolicyIDs(ids...)
 }
 
 // ClearAttestationCollections clears the "attestation_collections" edge to the AttestationCollection entity.
@@ -573,6 +691,51 @@ func (suo *StatementUpdateOne) sqlSave(ctx context.Context) (_node *Statement, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if suo.mutation.PoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.RemovedPoliciesIDs(); len(nodes) > 0 && !suo.mutation.PoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.PoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

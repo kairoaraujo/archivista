@@ -17,18 +17,24 @@ package sqlstore
 import (
 	"context"
 	"crypto"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/digitorus/timestamp"
 	"github.com/in-toto/archivista/ent"
 	"github.com/in-toto/archivista/internal/metadatastorage"
 	"github.com/in-toto/archivista/internal/metadatastorage/parserregistry"
+	"github.com/in-toto/archivista/internal/objectstorage/tuf"
 	"github.com/in-toto/go-witness/cryptoutil"
 	"github.com/in-toto/go-witness/dsse"
 	"github.com/in-toto/go-witness/intoto"
+	"github.com/in-toto/go-witness/policy"
 	"github.com/sirupsen/logrus"
 )
 
@@ -86,12 +92,7 @@ func (s *Store) withTx(ctx context.Context, fn func(tx *ent.Tx) error) error {
 	return nil
 }
 
-func (s *Store) Store(ctx context.Context, gitoid string, obj []byte) error {
-	envelope := &dsse.Envelope{}
-	if err := json.Unmarshal(obj, envelope); err != nil {
-		return err
-	}
-
+func (s *Store) storeAttestation(ctx context.Context, envelope *dsse.Envelope, gitoid string) error {
 	payloadDigestSet, err := cryptoutil.CalculateDigestSetFromBytes(envelope.Payload, []cryptoutil.DigestValue{{Hash: crypto.SHA256}})
 	if err != nil {
 		return err
@@ -216,6 +217,179 @@ func (s *Store) Store(ctx context.Context, gitoid string, obj []byte) error {
 	if err != nil {
 		logrus.Errorf("unable to store metadata: %+v", err)
 		return err
+	}
+
+	return nil
+}
+
+func (s *Store) storePolicy(ctx context.Context, obj []byte, envelope *dsse.Envelope, gitoid string) error {
+	payloadDigestSet, err := cryptoutil.CalculateDigestSetFromBytes(envelope.Payload, []cryptoutil.DigestValue{{Hash: crypto.SHA256}})
+	if err != nil {
+		return err
+	}
+
+	payload := &policy.Policy{}
+	if err := json.Unmarshal(envelope.Payload, payload); err != nil {
+		return err
+	}
+
+	err = s.withTx(ctx, func(tx *ent.Tx) error {
+		dsse, err := tx.Dsse.Create().
+			SetPayloadType(envelope.PayloadType).
+			SetGitoidSha256(gitoid).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+
+		// stores the envelope signatures
+		for _, sig := range envelope.Signatures {
+			storedSig, err := tx.Signature.Create().
+				SetKeyID(sig.KeyID).
+				SetSignature(base64.StdEncoding.EncodeToString(sig.Signature)).
+				SetDsse(dsse).
+				Save(ctx)
+			if err != nil {
+				return err
+			}
+
+			for _, timestamp := range sig.Timestamps {
+				timestampedTime, err := timeFromTimestamp(timestamp)
+				if err != nil {
+					return err
+				}
+
+				_, err = tx.Timestamp.Create().
+					SetSignature(storedSig).
+					SetTimestamp(timestampedTime).
+					SetType(string(timestamp.Type)).
+					Save(ctx)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		// stores the payload digests
+		for hashFn, digest := range payloadDigestSet {
+			hashName, err := cryptoutil.HashToString(hashFn.Hash)
+			if err != nil {
+				return err
+			}
+
+			if _, err := tx.PayloadDigest.Create().
+				SetDsse(dsse).
+				SetAlgorithm(hashName).
+				SetValue(digest).
+				Save(ctx); err != nil {
+				return err
+			}
+		}
+
+		stmt, err := tx.Statement.Create().
+			SetPredicate(envelope.PayloadType).
+			AddDsse(dsse).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+
+		// stores the subject
+		if _, err := tx.Subject.Create().
+			SetName(payload.Name).
+			SetStatement(stmt).
+			Save(ctx); err != nil {
+			return err
+		}
+
+		var policy *ent.AttestationPolicy
+		if policy, err = tx.AttestationPolicy.Create().
+			SetStatement(stmt).
+			SetName(payload.Name).
+			Save(ctx); err != nil {
+			return err
+		}
+
+		// store bulk of Subject Scope
+		bulkSubjectScope := make([]*ent.SubjectScopeCreate, 0)
+		for stepName, _ := range payload.Steps {
+			for _, atts := range payload.Steps[stepName].Attestations {
+				for _, subjectscope := range atts.SubjectScopes {
+					bulkSubjectScope = append(bulkSubjectScope,
+						tx.SubjectScope.Create().
+							SetSubject(atts.Type+"/"+subjectscope.Subject).
+							SetScope(subjectscope.Scope).
+							SetAttestationPolicy(policy),
+					)
+				}
+			}
+		}
+		if _, err := batch(ctx, 100, bulkSubjectScope, func(repository ...*ent.SubjectScopeCreate) saver[*ent.SubjectScope] {
+			return tx.SubjectScope.CreateBulk(repository...)
+		}); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		logrus.Errorf("unable to store metadata: %+v", err)
+		return err
+	}
+
+	objHash := sha256.Sum256(obj)
+	custom := make(map[string]any)
+	custom["gitoid"] = gitoid
+	artifacts := []tuf.Target{
+		{
+			Path: path.Join("policy", payload.Name),
+			Info: tuf.TargetsInfo{
+				Length: len(obj),
+				Hashes: tuf.Hashes{
+					Sha256: hex.EncodeToString(objHash[:]),
+				},
+				Custom: custom,
+			},
+		},
+		{
+			Path: gitoid,
+			Info: tuf.TargetsInfo{
+				Length: len(obj),
+				Hashes: tuf.Hashes{
+					Sha256: hex.EncodeToString(objHash[:]),
+				},
+			},
+		},
+	}
+
+	artifactPayload := tuf.ArtifactPayload{
+		Targets:           artifacts,
+		AddTaskIDToCustom: false,
+		PublishTargets:    true,
+	}
+
+	err = tuf.AddArtifact("http://rstuf-api/api/v1/artifacts/", artifactPayload)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) Store(ctx context.Context, gitoid string, obj []byte) error {
+	envelope := &dsse.Envelope{}
+	if err := json.Unmarshal(obj, envelope); err != nil {
+		return err
+	}
+
+	if strings.Contains(envelope.PayloadType, "https://witness.testifysec.com/policy/") {
+		if err := s.storePolicy(ctx, obj, envelope, gitoid); err != nil {
+			return err
+		}
+	} else {
+		if err := s.storeAttestation(ctx, envelope, gitoid); err != nil {
+			return err
+		}
 	}
 
 	return nil

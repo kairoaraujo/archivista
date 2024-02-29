@@ -68,7 +68,7 @@ services:
   minio-init:
     image: quay.io/minio/mc
     restart: on-failure
-    command: mb --insecure --ignore-existing testminio/attestations
+    command: mb --insecure --ignore-existing testminio/attestation &&  mb --insecure --ignore-existing testminio/policies
     environment:
       MC_HOST_testminio: http://testifytestifytestify:exampleexampleexample@minio:9000
 

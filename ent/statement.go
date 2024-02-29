@@ -29,17 +29,20 @@ type Statement struct {
 type StatementEdges struct {
 	// Subjects holds the value of the subjects edge.
 	Subjects []*Subject `json:"subjects,omitempty"`
+	// Policies holds the value of the policies edge.
+	Policies []*AttestationPolicy `json:"policies,omitempty"`
 	// AttestationCollections holds the value of the attestation_collections edge.
 	AttestationCollections *AttestationCollection `json:"attestation_collections,omitempty"`
 	// Dsse holds the value of the dsse edge.
 	Dsse []*Dsse `json:"dsse,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 	// totalCount holds the count of the edges above.
-	totalCount [3]map[string]int
+	totalCount [4]map[string]int
 
 	namedSubjects map[string][]*Subject
+	namedPolicies map[string][]*AttestationPolicy
 	namedDsse     map[string][]*Dsse
 }
 
@@ -52,10 +55,19 @@ func (e StatementEdges) SubjectsOrErr() ([]*Subject, error) {
 	return nil, &NotLoadedError{edge: "subjects"}
 }
 
+// PoliciesOrErr returns the Policies value or an error if the edge
+// was not loaded in eager-loading.
+func (e StatementEdges) PoliciesOrErr() ([]*AttestationPolicy, error) {
+	if e.loadedTypes[1] {
+		return e.Policies, nil
+	}
+	return nil, &NotLoadedError{edge: "policies"}
+}
+
 // AttestationCollectionsOrErr returns the AttestationCollections value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e StatementEdges) AttestationCollectionsOrErr() (*AttestationCollection, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.AttestationCollections == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: attestationcollection.Label}
@@ -68,7 +80,7 @@ func (e StatementEdges) AttestationCollectionsOrErr() (*AttestationCollection, e
 // DsseOrErr returns the Dsse value or an error if the edge
 // was not loaded in eager-loading.
 func (e StatementEdges) DsseOrErr() ([]*Dsse, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Dsse, nil
 	}
 	return nil, &NotLoadedError{edge: "dsse"}
@@ -126,6 +138,11 @@ func (s *Statement) Value(name string) (ent.Value, error) {
 // QuerySubjects queries the "subjects" edge of the Statement entity.
 func (s *Statement) QuerySubjects() *SubjectQuery {
 	return NewStatementClient(s.config).QuerySubjects(s)
+}
+
+// QueryPolicies queries the "policies" edge of the Statement entity.
+func (s *Statement) QueryPolicies() *AttestationPolicyQuery {
+	return NewStatementClient(s.config).QueryPolicies(s)
 }
 
 // QueryAttestationCollections queries the "attestation_collections" edge of the Statement entity.
@@ -188,6 +205,30 @@ func (s *Statement) appendNamedSubjects(name string, edges ...*Subject) {
 		s.Edges.namedSubjects[name] = []*Subject{}
 	} else {
 		s.Edges.namedSubjects[name] = append(s.Edges.namedSubjects[name], edges...)
+	}
+}
+
+// NamedPolicies returns the Policies named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (s *Statement) NamedPolicies(name string) ([]*AttestationPolicy, error) {
+	if s.Edges.namedPolicies == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := s.Edges.namedPolicies[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (s *Statement) appendNamedPolicies(name string, edges ...*AttestationPolicy) {
+	if s.Edges.namedPolicies == nil {
+		s.Edges.namedPolicies = make(map[string][]*AttestationPolicy)
+	}
+	if len(edges) == 0 {
+		s.Edges.namedPolicies[name] = []*AttestationPolicy{}
+	} else {
+		s.Edges.namedPolicies[name] = append(s.Edges.namedPolicies[name], edges...)
 	}
 }
 

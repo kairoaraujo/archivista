@@ -13,12 +13,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/errcode"
 	"github.com/in-toto/archivista/ent/attestation"
 	"github.com/in-toto/archivista/ent/attestationcollection"
+	"github.com/in-toto/archivista/ent/attestationpolicy"
 	"github.com/in-toto/archivista/ent/dsse"
 	"github.com/in-toto/archivista/ent/payloaddigest"
 	"github.com/in-toto/archivista/ent/signature"
 	"github.com/in-toto/archivista/ent/statement"
 	"github.com/in-toto/archivista/ent/subject"
 	"github.com/in-toto/archivista/ent/subjectdigest"
+	"github.com/in-toto/archivista/ent/subjectscope"
 	"github.com/in-toto/archivista/ent/timestamp"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -592,6 +594,252 @@ func (ac *AttestationCollection) ToEdge(order *AttestationCollectionOrder) *Atte
 	return &AttestationCollectionEdge{
 		Node:   ac,
 		Cursor: order.Field.toCursor(ac),
+	}
+}
+
+// AttestationPolicyEdge is the edge representation of AttestationPolicy.
+type AttestationPolicyEdge struct {
+	Node   *AttestationPolicy `json:"node"`
+	Cursor Cursor             `json:"cursor"`
+}
+
+// AttestationPolicyConnection is the connection containing edges to AttestationPolicy.
+type AttestationPolicyConnection struct {
+	Edges      []*AttestationPolicyEdge `json:"edges"`
+	PageInfo   PageInfo                 `json:"pageInfo"`
+	TotalCount int                      `json:"totalCount"`
+}
+
+func (c *AttestationPolicyConnection) build(nodes []*AttestationPolicy, pager *attestationpolicyPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *AttestationPolicy
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *AttestationPolicy {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *AttestationPolicy {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*AttestationPolicyEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &AttestationPolicyEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// AttestationPolicyPaginateOption enables pagination customization.
+type AttestationPolicyPaginateOption func(*attestationpolicyPager) error
+
+// WithAttestationPolicyOrder configures pagination ordering.
+func WithAttestationPolicyOrder(order *AttestationPolicyOrder) AttestationPolicyPaginateOption {
+	if order == nil {
+		order = DefaultAttestationPolicyOrder
+	}
+	o := *order
+	return func(pager *attestationpolicyPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultAttestationPolicyOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithAttestationPolicyFilter configures pagination filter.
+func WithAttestationPolicyFilter(filter func(*AttestationPolicyQuery) (*AttestationPolicyQuery, error)) AttestationPolicyPaginateOption {
+	return func(pager *attestationpolicyPager) error {
+		if filter == nil {
+			return errors.New("AttestationPolicyQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type attestationpolicyPager struct {
+	reverse bool
+	order   *AttestationPolicyOrder
+	filter  func(*AttestationPolicyQuery) (*AttestationPolicyQuery, error)
+}
+
+func newAttestationPolicyPager(opts []AttestationPolicyPaginateOption, reverse bool) (*attestationpolicyPager, error) {
+	pager := &attestationpolicyPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultAttestationPolicyOrder
+	}
+	return pager, nil
+}
+
+func (p *attestationpolicyPager) applyFilter(query *AttestationPolicyQuery) (*AttestationPolicyQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *attestationpolicyPager) toCursor(ap *AttestationPolicy) Cursor {
+	return p.order.Field.toCursor(ap)
+}
+
+func (p *attestationpolicyPager) applyCursors(query *AttestationPolicyQuery, after, before *Cursor) (*AttestationPolicyQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultAttestationPolicyOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *attestationpolicyPager) applyOrder(query *AttestationPolicyQuery) *AttestationPolicyQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultAttestationPolicyOrder.Field {
+		query = query.Order(DefaultAttestationPolicyOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *attestationpolicyPager) orderExpr(query *AttestationPolicyQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultAttestationPolicyOrder.Field {
+			b.Comma().Ident(DefaultAttestationPolicyOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to AttestationPolicy.
+func (ap *AttestationPolicyQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...AttestationPolicyPaginateOption,
+) (*AttestationPolicyConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newAttestationPolicyPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if ap, err = pager.applyFilter(ap); err != nil {
+		return nil, err
+	}
+	conn := &AttestationPolicyConnection{Edges: []*AttestationPolicyEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = ap.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if ap, err = pager.applyCursors(ap, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		ap.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := ap.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	ap = pager.applyOrder(ap)
+	nodes, err := ap.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// AttestationPolicyOrderField defines the ordering field of AttestationPolicy.
+type AttestationPolicyOrderField struct {
+	// Value extracts the ordering value from the given AttestationPolicy.
+	Value    func(*AttestationPolicy) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) attestationpolicy.OrderOption
+	toCursor func(*AttestationPolicy) Cursor
+}
+
+// AttestationPolicyOrder defines the ordering of AttestationPolicy.
+type AttestationPolicyOrder struct {
+	Direction OrderDirection               `json:"direction"`
+	Field     *AttestationPolicyOrderField `json:"field"`
+}
+
+// DefaultAttestationPolicyOrder is the default ordering of AttestationPolicy.
+var DefaultAttestationPolicyOrder = &AttestationPolicyOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &AttestationPolicyOrderField{
+		Value: func(ap *AttestationPolicy) (ent.Value, error) {
+			return ap.ID, nil
+		},
+		column: attestationpolicy.FieldID,
+		toTerm: attestationpolicy.ByID,
+		toCursor: func(ap *AttestationPolicy) Cursor {
+			return Cursor{ID: ap.ID}
+		},
+	},
+}
+
+// ToEdge converts AttestationPolicy into AttestationPolicyEdge.
+func (ap *AttestationPolicy) ToEdge(order *AttestationPolicyOrder) *AttestationPolicyEdge {
+	if order == nil {
+		order = DefaultAttestationPolicyOrder
+	}
+	return &AttestationPolicyEdge{
+		Node:   ap,
+		Cursor: order.Field.toCursor(ap),
 	}
 }
 
@@ -2068,6 +2316,252 @@ func (sd *SubjectDigest) ToEdge(order *SubjectDigestOrder) *SubjectDigestEdge {
 	return &SubjectDigestEdge{
 		Node:   sd,
 		Cursor: order.Field.toCursor(sd),
+	}
+}
+
+// SubjectScopeEdge is the edge representation of SubjectScope.
+type SubjectScopeEdge struct {
+	Node   *SubjectScope `json:"node"`
+	Cursor Cursor        `json:"cursor"`
+}
+
+// SubjectScopeConnection is the connection containing edges to SubjectScope.
+type SubjectScopeConnection struct {
+	Edges      []*SubjectScopeEdge `json:"edges"`
+	PageInfo   PageInfo            `json:"pageInfo"`
+	TotalCount int                 `json:"totalCount"`
+}
+
+func (c *SubjectScopeConnection) build(nodes []*SubjectScope, pager *subjectscopePager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *SubjectScope
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *SubjectScope {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *SubjectScope {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*SubjectScopeEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &SubjectScopeEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// SubjectScopePaginateOption enables pagination customization.
+type SubjectScopePaginateOption func(*subjectscopePager) error
+
+// WithSubjectScopeOrder configures pagination ordering.
+func WithSubjectScopeOrder(order *SubjectScopeOrder) SubjectScopePaginateOption {
+	if order == nil {
+		order = DefaultSubjectScopeOrder
+	}
+	o := *order
+	return func(pager *subjectscopePager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultSubjectScopeOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithSubjectScopeFilter configures pagination filter.
+func WithSubjectScopeFilter(filter func(*SubjectScopeQuery) (*SubjectScopeQuery, error)) SubjectScopePaginateOption {
+	return func(pager *subjectscopePager) error {
+		if filter == nil {
+			return errors.New("SubjectScopeQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type subjectscopePager struct {
+	reverse bool
+	order   *SubjectScopeOrder
+	filter  func(*SubjectScopeQuery) (*SubjectScopeQuery, error)
+}
+
+func newSubjectScopePager(opts []SubjectScopePaginateOption, reverse bool) (*subjectscopePager, error) {
+	pager := &subjectscopePager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultSubjectScopeOrder
+	}
+	return pager, nil
+}
+
+func (p *subjectscopePager) applyFilter(query *SubjectScopeQuery) (*SubjectScopeQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *subjectscopePager) toCursor(ss *SubjectScope) Cursor {
+	return p.order.Field.toCursor(ss)
+}
+
+func (p *subjectscopePager) applyCursors(query *SubjectScopeQuery, after, before *Cursor) (*SubjectScopeQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultSubjectScopeOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *subjectscopePager) applyOrder(query *SubjectScopeQuery) *SubjectScopeQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultSubjectScopeOrder.Field {
+		query = query.Order(DefaultSubjectScopeOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *subjectscopePager) orderExpr(query *SubjectScopeQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultSubjectScopeOrder.Field {
+			b.Comma().Ident(DefaultSubjectScopeOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to SubjectScope.
+func (ss *SubjectScopeQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...SubjectScopePaginateOption,
+) (*SubjectScopeConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newSubjectScopePager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if ss, err = pager.applyFilter(ss); err != nil {
+		return nil, err
+	}
+	conn := &SubjectScopeConnection{Edges: []*SubjectScopeEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = ss.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if ss, err = pager.applyCursors(ss, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		ss.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := ss.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	ss = pager.applyOrder(ss)
+	nodes, err := ss.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// SubjectScopeOrderField defines the ordering field of SubjectScope.
+type SubjectScopeOrderField struct {
+	// Value extracts the ordering value from the given SubjectScope.
+	Value    func(*SubjectScope) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) subjectscope.OrderOption
+	toCursor func(*SubjectScope) Cursor
+}
+
+// SubjectScopeOrder defines the ordering of SubjectScope.
+type SubjectScopeOrder struct {
+	Direction OrderDirection          `json:"direction"`
+	Field     *SubjectScopeOrderField `json:"field"`
+}
+
+// DefaultSubjectScopeOrder is the default ordering of SubjectScope.
+var DefaultSubjectScopeOrder = &SubjectScopeOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &SubjectScopeOrderField{
+		Value: func(ss *SubjectScope) (ent.Value, error) {
+			return ss.ID, nil
+		},
+		column: subjectscope.FieldID,
+		toTerm: subjectscope.ByID,
+		toCursor: func(ss *SubjectScope) Cursor {
+			return Cursor{ID: ss.ID}
+		},
+	},
+}
+
+// ToEdge converts SubjectScope into SubjectScopeEdge.
+func (ss *SubjectScope) ToEdge(order *SubjectScopeOrder) *SubjectScopeEdge {
+	if order == nil {
+		order = DefaultSubjectScopeOrder
+	}
+	return &SubjectScopeEdge{
+		Node:   ss,
+		Cursor: order.Field.toCursor(ss),
 	}
 }
 

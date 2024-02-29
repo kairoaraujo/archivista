@@ -33,6 +33,18 @@ func (f AttestationCollectionFunc) Mutate(ctx context.Context, m ent.Mutation) (
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttestationCollectionMutation", m)
 }
 
+// The AttestationPolicyFunc type is an adapter to allow the use of ordinary
+// function as AttestationPolicy mutator.
+type AttestationPolicyFunc func(context.Context, *ent.AttestationPolicyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttestationPolicyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AttestationPolicyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttestationPolicyMutation", m)
+}
+
 // The DsseFunc type is an adapter to allow the use of ordinary
 // function as Dsse mutator.
 type DsseFunc func(context.Context, *ent.DsseMutation) (ent.Value, error)
@@ -103,6 +115,18 @@ func (f SubjectDigestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubjectDigestMutation", m)
+}
+
+// The SubjectScopeFunc type is an adapter to allow the use of ordinary
+// function as SubjectScope mutator.
+type SubjectScopeFunc func(context.Context, *ent.SubjectScopeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SubjectScopeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SubjectScopeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SubjectScopeMutation", m)
 }
 
 // The TimestampFunc type is an adapter to allow the use of ordinary

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/in-toto/archivista/ent/attestationcollection"
+	"github.com/in-toto/archivista/ent/attestationpolicy"
 	"github.com/in-toto/archivista/ent/dsse"
 	"github.com/in-toto/archivista/ent/statement"
 	"github.com/in-toto/archivista/ent/subject"
@@ -41,6 +42,21 @@ func (sc *StatementCreate) AddSubjects(s ...*Subject) *StatementCreate {
 		ids[i] = s[i].ID
 	}
 	return sc.AddSubjectIDs(ids...)
+}
+
+// AddPolicyIDs adds the "policies" edge to the AttestationPolicy entity by IDs.
+func (sc *StatementCreate) AddPolicyIDs(ids ...int) *StatementCreate {
+	sc.mutation.AddPolicyIDs(ids...)
+	return sc
+}
+
+// AddPolicies adds the "policies" edges to the AttestationPolicy entity.
+func (sc *StatementCreate) AddPolicies(a ...*AttestationPolicy) *StatementCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return sc.AddPolicyIDs(ids...)
 }
 
 // SetAttestationCollectionsID sets the "attestation_collections" edge to the AttestationCollection entity by ID.
@@ -158,6 +174,22 @@ func (sc *StatementCreate) createSpec() (*Statement, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(subject.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.PoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   statement.PoliciesTable,
+			Columns: []string{statement.PoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(attestationpolicy.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

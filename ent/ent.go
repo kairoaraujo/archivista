@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/in-toto/archivista/ent/attestation"
 	"github.com/in-toto/archivista/ent/attestationcollection"
+	"github.com/in-toto/archivista/ent/attestationpolicy"
 	"github.com/in-toto/archivista/ent/dsse"
 	"github.com/in-toto/archivista/ent/payloaddigest"
 	"github.com/in-toto/archivista/ent/signature"
 	"github.com/in-toto/archivista/ent/statement"
 	"github.com/in-toto/archivista/ent/subject"
 	"github.com/in-toto/archivista/ent/subjectdigest"
+	"github.com/in-toto/archivista/ent/subjectscope"
 	"github.com/in-toto/archivista/ent/timestamp"
 )
 
@@ -83,12 +85,14 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			attestation.Table:           attestation.ValidColumn,
 			attestationcollection.Table: attestationcollection.ValidColumn,
+			attestationpolicy.Table:     attestationpolicy.ValidColumn,
 			dsse.Table:                  dsse.ValidColumn,
 			payloaddigest.Table:         payloaddigest.ValidColumn,
 			signature.Table:             signature.ValidColumn,
 			statement.Table:             statement.ValidColumn,
 			subject.Table:               subject.ValidColumn,
 			subjectdigest.Table:         subjectdigest.ValidColumn,
+			subjectscope.Table:          subjectscope.ValidColumn,
 			timestamp.Table:             timestamp.ValidColumn,
 		})
 	})
